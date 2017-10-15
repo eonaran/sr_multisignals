@@ -1,0 +1,453 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{amscd}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{bbold}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{easybmat}
+\usepackage{etex}
+\usepackage{framed}
+\usepackage[dvips,letterpaper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[noabbrev,capitalize]{cleveref}
+\usepackage{mathtools}
+\usepackage{setspace}
+\usepackage{verbatim}
+
+%
+% Commands
+%
+
+% Figures
+\newcommand{\fig}[1]{(figure \ref{#1})}
+\newcommand{\FIG}[1]{figure \ref{#1}}
+
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+
+% Names
+\newcommand{\Mobius}{M\"{o}bius}
+\newcommand{\Holder}{H\"{o}lder}
+\newcommand{\Rouche}{Rouch\'{e}}
+\newcommand{\Ito}{It\={o}}
+\newcommand{\Kondo}{Kond\^{o}}
+\newcommand{\Levy}{L\'{e}vy}
+\newcommand{\Cramer}{Cram\'{e}r}
+\newcommand{\Godel}{G\"{o}del}
+\newcommand{\Carath}{Carath\'{e}odory}
+\newcommand{\Caratheodory}{Carath\'{e}odory}
+\newcommand{\Hopital}{H\^{o}pital}
+
+% Random
+\renewcommand{\bar}{\overline}
+\newcommand{\lvec}{\overrightarrow}
+\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
+
+% Disjoint union
+\makeatletter
+\def\moverlay{\mathpalette\mov@rlay}
+\def\mov@rlay#1#2{\leavevmode\vtop{%
+   \baselineskip\z@skip \lineskiplimit-\maxdimen
+   \ialign{\hfil$\m@th#1##$\hfil\cr#2\crcr}}}
+\newcommand{\charfusion}[3][\mathord]{
+    #1{\ifx#1\mathop\vphantom{#2}\fi
+        \mathpalette\mov@rlay{#2\cr#3}
+      }
+    \ifx#1\mathop\expandafter\displaylimits\fi}
+\makeatother
+
+\newcommand{\cupdot}{\charfusion[\mathbin]{\cup}{\cdot}}
+\newcommand{\bigcupdot}{\charfusion[\mathop]{\bigcup}{\cdot}}
+
+% Blackboard bold
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\HH}{\mathbb{H}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\renewcommand{\AA}{\mathbb{A}}
+\newcommand{\FF}{\mathbb{F}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\Fp}{\FF_p}
+\newcommand{\TrivGp}{\mathbbold{1}}
+\newcommand{\One}{\mathbbold{1}}
+
+\newcommand{\RP}{\RR\mathrm{P}}
+\newcommand{\CP}{\CC\mathrm{P}}
+
+% Vector bold
+\newcommand{\nn}{\bm{n}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\ww}{\bm{w}}
+\newcommand{\xx}{\bm{x}}
+\newcommand{\yy}{\bm{y}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\one}{\bm{1}}
+
+% Other fonts
+\newcommand{\fp}{\mathfrak{p}}
+\newcommand{\fq}{\mathfrak{q}}
+\newcommand{\fg}{\mathfrak{g}}
+\newcommand{\fh}{\mathfrak{h}}
+\newcommand{\fa}{\mathfrak{a}}
+\newcommand{\fb}{\mathfrak{b}}
+\newcommand{\fc}{\mathfrak{c}}
+\newcommand{\fm}{\mathfrak{m}}
+\renewcommand{\sl}{\mathfrak{sl}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\gl}{\mathfrak{gl}}
+\renewcommand{\sp}{\mathfrak{sp}}
+\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sB}{\mathcal{B}}
+\newcommand{\sC}{\mathcal{C}}
+\newcommand{\sD}{\mathcal{D}}
+\newcommand{\sE}{\mathcal{E}}
+\newcommand{\sF}{\mathcal{F}}
+\newcommand{\sG}{\mathcal{G}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sI}{\mathcal{I}}
+\newcommand{\sL}{\mathcal{L}}
+\newcommand{\sM}{\mathcal{M}}
+\newcommand{\sN}{\mathcal{N}}
+\newcommand{\sO}{\mathcal{O}}
+\newcommand{\sP}{\mathcal{P}}
+\newcommand{\sR}{\mathcal{R}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sU}{\mathcal{U}}
+\newcommand{\sV}{\mathcal{V}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
+
+% Spacing
+\newcommand\ThmBr{%
+    \@ifstar{\item[\vbox{\null}]}{%
+      \begingroup % keep changes local
+      \setlength\itemsep{0pt}%
+      \setlength\parsep{0pt}%
+       \item[\vbox{\null}]%
+      \endgroup%
+     }}
+\newcommand{\br}{\vspace{1pc}}
+\newcommand{\BR}{\vspace{2pc}}
+\newcommand{\picspace}{\vspace{13pc}}
+\newcommand{\hs}{\hspace{1mm}}
+\newcommand{\HS}{\hspace{3.5mm}}
+\newcommand{\hr}{
+  \begin{center}
+    \line(1,0){250}
+  \end{center}
+}
+\newcommand{\hrs}{
+  \begin{center}
+    \line(1,0){150}
+  \end{center}
+}
+
+% Plain text
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\newcommand{\disc}{\mathrm{disc}}
+\newcommand{\Ann}{\mathrm{Ann}}
+\newcommand{\Ass}{\mathrm{Ass}}
+\newcommand{\Soc}{\mathrm{Soc}}
+\newcommand{\Supp}{\mathrm{Supp}}
+\newcommand{\Spec}{\mathrm{Spec}}
+\newcommand{\maxSpec}{\mathrm{maxSpec}}
+
+\newcommand{\N}{\mathrm{N}}
+\newcommand{\Tr}{\mathrm{Tr}}
+
+% Functors
+\newcommand{\Hom}{\mathrm{Hom}}
+\newcommand{\Der}{\mathrm{Der}}
+\newcommand{\End}{\mathrm{End}}
+\newcommand{\Ind}{\mathrm{Ind}}
+\newcommand{\Aut}{\mathrm{Aut}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Rad}{\mathrm{Rad}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\Pow}{\mathrm{Pow}}
+\newcommand{\diam}{\mathrm{diam}}
+
+\newcommand{\img}{\mathrm{img}}
+\newcommand{\sgn}{\mathrm{sgn}}
+
+\newcommand{\ch}{\mathrm{char}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\ord}{\mathrm{ord}}
+\newcommand{\cont}{\mathrm{cont}}
+\newcommand{\ab}{\mathrm{ab}}
+\newcommand{\Orb}{\mathrm{Orb}}
+\newcommand{\Syl}{\mathrm{Syl}}
+\newcommand{\Irr}{\mathrm{Irr}}
+\newcommand{\Frac}{\mathrm{Frac}}
+\newcommand{\sep}{\mathrm{sep}}
+\newcommand{\per}{\mathrm{per}}
+
+% Groups
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\PGL}{\mathrm{PGL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
+\newcommand{\oO}{\mathrm{O}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\PSO}{\mathrm{PSO}}
+\newcommand{\Sp}{\mathrm{Sp}}
+\newcommand{\PSp}{\mathrm{PSp}}
+\newcommand{\U}{\mathrm{U}}
+\newcommand{\SU}{\mathrm{SU}}
+\newcommand{\PSU}{\mathrm{PSU}}
+
+% Parentheses
+\newcommand{\lgndr}[2]{\ensuremath{\left(\frac{#1}{#2}\right)}}
+
+% Mappings
+\newcommand{\iso}{\cong}
+\newcommand{\eqdf}{\stackrel{\mathrm{df}}{=}}
+\newcommand{\eqd}{\stackrel{\mathrm{d}}{=}}
+\newcommand{\eqqu}{\stackrel{\mathrm{?}}{=}}
+\newcommand{\xto}{\xrightarrow}
+\newcommand{\dto}{\Rightarrow}
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\xinto}{\xhookrightarrow}
+\newcommand{\onto}{\twoheadrightarrow}
+\newcommand{\xonto}{xtwoheadrightarrow}
+\newcommand{\isoto}{\xto{\sim}}
+\newcommand{\upto}{\nearrow}
+\newcommand{\downto}{\searrow}
+
+% Convenience
+\newcommand{\Implies}{\ensuremath{\Rightarrow}}
+\newcommand{\ImpliedBy}{\ensuremath{\Leftarrow}}
+\newcommand{\Iff}{\ensuremath{\Leftrightarrow}}
+
+\newcommand{\Pfright}{\ensuremath{(\Rightarrow):\hs}}
+\newcommand{\Pfleft}{\ensuremath{(\Leftarrow):\hs}}
+
+\newcommand{\sm}{\ensuremath{\setminus}}
+
+\newcommand{\tab}[1]{(table \ref{#1})}
+\newcommand{\TAB}[1]{table \ref{#1}}
+
+\newcommand{\precode}[1]{\textbf{\footnotesize #1}}
+\newcommand{\code}[1]{\texttt{\footnotesize #1}}
+
+\newcommand{\sectionline}{
+  \nointerlineskip \vspace{\baselineskip}
+  \hspace{\fill}\rule{0.35\linewidth}{.7pt}\hspace{\fill}
+  \par\nointerlineskip \vspace{\baselineskip}
+}
+
+
+%
+% Misc
+%
+
+\parskip0em
+\linespread{1.05}
+\widowpenalty10000
+\clubpenalty10000
+
+
+\newcommand{\HC}{\mathsf{HC}}
+\newcommand{\CHC}{\mathsf{CHC}}
+\newcommand{\SK}{\mathsf{SK}}
+\newcommand{\SDP}{\mathsf{SDP}}
+\newcommand{\SOS}{\mathsf{SOS}}
+\newcommand{\PE}{\mathsf{PE}}
+\newcommand{\PS}{\mathsf{PS}}
+\newcommand{\tEE}{\tilde{\mathbb{E}}}
+\newcommand{\tCov}{\widetilde{\mathrm{Cov}}}
+\newcommand{\sfP}{\mathsf{P}}
+\newcommand{\argmin}{\mathrm{argmin}}
+\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\vrad}{\mathrm{vrad}}
+\newcommand{\rk}{\mathrm{rk}}
+\newcommand{\rkeff}{\mathrm{rk}_{\mathrm{eff}}}
+\newcommand{\GOE}{\mathsf{GOE}}
+\newcommand{\ssG}{\mathsf{G}}
+\newcommand{\bA}{\bm A}
+\newcommand{\bB}{\bm B}
+\newcommand{\bD}{\bm D}
+\newcommand{\bG}{\bm G}
+\newcommand{\bH}{\bm H}
+\newcommand{\bP}{\bm P}
+\newcommand{\bQ}{\bm Q}
+\newcommand{\bR}{\bm R}
+\newcommand{\bW}{\bm W}
+\newcommand{\bX}{\bm X}
+\newcommand{\ba}{\bm a}
+\newcommand{\bb}{\bm b}
+\newcommand{\bg}{\bm g}
+\newcommand{\bv}{\bm v}
+\newcommand{\bw}{\bm w}
+\newcommand{\bx}{\bm x}
+
+\DeclareRobustCommand{\bmrob}[1]{\bm{#1}}
+\pdfstringdefDisableCommands{%
+  \renewcommand{\bmrob}[1]{#1}%
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\title{Super-Resolution of Multiple Signals with Common Support}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\section{Introduction}
+
+\subsection{Single Observation Recovery}
+
+We are interested in the following problem: a signal is observed at a finite set of times $t_j \in T \subset [0, 1]$ with amplitudes $a_j \in \CC$, forming a time-domain ideal observation
+\[ x = \sum_{t_j \in T} a_j\delta_{t_j}. \]
+If the measurements are low-resolution, the actual observation may be modeled by convolving with a low-pass point spread function (PSF) $\phi$, giving
+\[ x_L = (\phi * x)(t) = \sum_{t_j \in T} a_j \phi(t - t_j). \]
+It is convenient to simplify and assume that in the Fourier domain $\phi$ is a constant supported on $[-f_c, f_c]$, and that what we really observe is finitely many samples of the Fourier transform of $x$,
+\[ y(k) = (\sF_{[-f_c, f_c]} x_L)(k) = \int_0^1 e^{-2\pi i k t} x_L(t) dt = \sum a_j e^{-2\pi i k t_j} \]
+for $k \in \ZZ \cap [-f_c, f_c]$.
+
+\subsection{Dual Certificate}
+
+\begin{definition}
+    Let $\mu \subset \CC$ denote the complex unit circle.
+    A \emph{sign pattern} on a set is an assignment of points of $\mu$ to each point of the set.
+\end{definition}
+
+\begin{definition}
+    For a sign pattern $v \in \mu^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$ given by
+    \[ q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t} \]
+    is a \emph{(single-observation) dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$, and $|q(t)| < 1$ for $t \notin T$.
+\end{definition}
+If a dual certificate for the sign pattern $v = \frac{a_j}{|a_j|}$ exists, it follows that $x$ is the unique solution of TV minimization for the super-resolution problem.
+Therefore, to prove the effectiveness of TV minimization it suffices to show that a dual certificate exists under some conditions on $T$.
+The main result of \cite{fernandez2016super} is thus equivalent to the following.
+\begin{theorem}[Proposition 2.3 of \cite{fernandez2016super}]
+    If $\Delta(T) \geq \frac{1.26}{f_c}$ and $f_c \geq 10^3$, then a dual certificate exists for any sign pattern on $T$.
+    \label{thm:single-obs-recovery}
+\end{theorem}
+
+\subsection{Multiple Observation Recovery}
+
+\section{Single-Observation Recovery Proof}
+
+In this section, we outline the proof from \cite{fernandez2016super} of Theorem~\ref{thm:single-obs-recovery}.
+It is most intuitive to view the dual certificate as the result of a sequence of increasingly more and more refined constructions, noting at each point what does not suffice about the tools accumulated.
+
+\subsection{Dirichlet Kernel Interpolation}
+
+\begin{definition}
+    The \emph{Dirichlet kernel with cutoff $f$} is the periodic function $K_f: \TT \to \RR$ defined by
+    \[ K_f(t) = \frac{1}{2f + 1} \sum_{k = -f}^f e^{2\pi i k t}. \]
+\end{definition}
+The Dirichlet kernels are useful in our situation because they simultaneously satisfy two desirable properties: (1) they form a family of approximations to the identity as $f_c \to \infty$, and (2) they are low-pass for each fixed $f_c$.
+Thus, these will be the basic building blocks of our dual certificates.
+
+Concretely, a simple way to interpolate the sign pattern $v \in \mu^T$ is to declare that
+\[ q(t) = \sum_{t_j \in T} \alpha_j K_{f_c}(t - t_j), \]
+then solve the linear algebra problem arising for the $\alpha_j$ when we require that $q(t_j) = v_j$.
+However, in this case we will run into problems ensuring that $|q(t)| < 1$ when $t \notin T$, since the tail of $K_{f_c}$ decays slowly, thus roughly speaking $q(t)$ has non-negligible contributions from many of the $t_j \in T$.
+  
+\subsection{Multi-Dirichlet Kernel Interpolation}
+
+\begin{definition}
+    The \emph{multi-Dirichlet Kernel with cutoffs $f\bm \gamma$} for $\bm\gamma \in \RR^p_{\geq 0}$ satisfying $\sum_{j = 1}^p \gamma_j = 1$ is
+    \[ K_{f\bm\gamma}(t) = \prod_{j = 1}^p K_{\gamma_j f}(t). \]
+    The constraint on $\bm \gamma$ ensures that $K_{f\bm\gamma}$ is indeed $f$-low-pass.
+\end{definition}
+The more spread out the coordinates of $\bm\gamma$ are, the less sharp $K_{f\bm\gamma}(t)$ is around $t = 0$, but the faster its tail decays.
+Thus, introducing this extra parameter lets us control the trade-off between the quality of the interpolation vs.\ the control over the off-support magnitude.
+
+\subsection{Interpolation with Derivative}
+
+The remaining problem is rather technical: though our interpolation will now be exact and the magnitude $|q(t)|$ will be controlled away from each $t_j$, very near each $t_j$ we require $|q(t)|$ to achieve a local maximum, and there is no reason to think that the present construction will achieve this.
+To this end, we simultaneously interpolate with the kernel and its derivative, and add an additional constraint that $q(t)$ has a critical point at each $t_j$ (the other aspects of our construction will then let us ensure that the critical point is in fact a local maximum of the magnitude).
+We take
+\[ q(t) = \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}(t - t_j) + \beta_j K_{f_c \bm \gamma}^\prime(t - t_j)\right\}, \]
+and solve the larger linear algebra problem
+\begin{align*}
+  v_k &= \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}(t_k - t_j) + \beta_j K_{f_c \bm \gamma}^\prime(t_k - t_j)\right\} \\
+  0 &= \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}^{\prime}(t_k - t_j) + \beta_j K_{f_c \bm \gamma}^{\prime\prime}(t_k - t_j)\right\}
+\end{align*}
+to obtain the coefficients $\alpha_j, \beta_j$.
+
+This is the basic construction used in the proof of Theorem~\ref{thm:single-obs-recovery}.
+There are two things left to verify:
+\begin{enumerate}
+\item The linear algebra problem above has a solution $(\bm \alpha, \bm\beta)$, which is fairly well-behaved.
+\item $|q(t)| < 1$ for all $t \notin T$.
+\end{enumerate}
+The next two sections will outline the proofs of these statements.
+Of particular interest is which proofs use which assumptions on $\Delta(T)$, and the relationships between the bounds involved.
+
+\subsection{Solving for Interpolation Coefficients}
+Defining matrices
+\begin{align*}
+  \bD^{(0)}_{jk} &= K_{f_c \bm \gamma}(t_k - t_j), \\
+  \bD^{(1)}_{jk} &= K_{f_c \bm \gamma}^\prime(t_k - t_j), \\
+  \bD^{(2)}_{jk} &= K_{f_c \bm \gamma}^{\prime\prime}(t_k - t_j),
+\end{align*}
+and the block matrix
+\[ \bD = \left[\begin{array}{cc} \bD^{(0)} & \bD^{(1)} \\ \bD^{(1)} & \bD^{(2)} \end{array}\right], \]
+the linear algebra problem for the interpolation coefficients may be written
+\[ \bD\left[\begin{array}{c} \bm \alpha \\ \bm \beta \end{array}\right] = \left[\begin{array}{c} \bm v \\ \bm 0 \end{array}\right]. \]
+There are then two things to verify.
+\begin{lemma}
+    $\bD$ is invertible.
+\end{lemma}
+\begin{lemma}
+    Defining
+    \[ \left[\begin{array}{c} \bm \alpha \\ \bm \beta \end{array}\right] \coloneqq \bD^{-1}\left[\begin{array}{c} \bm v \\ \bm 0 \end{array}\right], \]
+    these $\bm\alpha$, $\bm\beta$ satisfy some $\ell^\infty$ bounds.
+\end{lemma}
+In the random sign pattern setting, we will have $\bv$ be a random variable, and therefore $\bm \alpha$ and $\bm\beta$ will be random as well.
+In particular, if $\bv$ is close to Gaussian, then so are $\bm\alpha$ and $\bm\beta$, with covariance that we can write down in terms of $\bD^{-1}$.
+There are many tools for bounding the supremum of a Gaussian vector, so we might hope to improve the bounds on $\bm\alpha$ and $\bm\beta$ in the random case.
+
+This section of the argument in \cite{fernandez2016super} depends \emph{only} on the lower bound $f_c \geq 10^3$.
+Thus, the most we can hope for from the above sketch is to reduce this number, or improve the resulting bounds on $\|\bm\alpha\|_\infty, \|\bm\beta\|_\infty$.
+The latter is more helpful, since it feeds into the off-support bounds where it plays an important role.
+
+\subsection{Proving Off-Support Bound}
+
+\section{Random Sign Patterns}
+
+
+\bibliographystyle{unsrt}
+\bibliography{main}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
