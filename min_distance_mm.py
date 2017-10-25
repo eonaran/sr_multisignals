@@ -8,11 +8,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def build_support(distance, n_spikes, jitter_ratio, jitter_factor):
+    jitter = distance/jitter_factor;
     
-    return(0);
-
+    tspikes_aux = np.arange(distance/2, (n_spikes+2)*distance, distance );
+    #offsets = np.cumsum(jitter*np.random.rand((n_spikes,1))* (np.random.rand((n_spikes,1))<jitter_ratio) );
+    offsets =0;
+    tspikes = tspikes_aux[0:n_spikes] + offsets;
+    return(tspikes); 
+    
 
 def feasibility_test_mm(tspikes, fc,pattern,K):
+    nspikes = tspikes.size; 
+        
     
     return(0)
     
@@ -22,7 +29,7 @@ def main():
     jitter_ratio=0.75;
     fc_vector = np.array([40]); #[30 40 50];
     n_spikes=25;
-    K=4;
+    K=1;
     distance_vector = [] ;
     successes = [];
     
@@ -36,8 +43,8 @@ def main():
             
             for ind_rep in range(repetitions):
                 tspikes = build_support(distance, n_spikes, jitter_ratio, jitter_factor);
-                aux_pattern = np.random.randn(n_spikes,K);
-                pattern = aux_pattern/np.matlib.repmat(np.sqrt(np.sum(np.conj(aux_pattern)*aux_pattern,2 )),1,K);
+                aux_pattern = np.random.randn(n_spikes,K)+1j*np.random.randn(n_spikes,K);
+                pattern = aux_pattern/np.matlib.repmat(np.sqrt(np.sum(np.conj(aux_pattern)*aux_pattern,1 )),1,K);
                 successes[ind_fc][ind_distance] = successes[ind_fc][ind_distance]+feasibility_test_mm(tspikes, fc,pattern,K)    
         
         
