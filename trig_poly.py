@@ -1,3 +1,4 @@
+import operator
 import numbers
 import numpy as np
 
@@ -17,6 +18,13 @@ class TrigPoly(object):
         return cls(freqs, coeffs)
 
     @classmethod
+    def multi_dirichlet(cls, f, gammas):
+        return reduce(
+            operator.mul,
+            [cls.dirichlet(int(f * gamma)) for gamma in gammas],
+            cls.one())
+
+    @classmethod
     def zero(cls):
         return cls([0], [0.0])
 
@@ -25,6 +33,8 @@ class TrigPoly(object):
         return cls([0], [1.0])
 
     def eval(self, t):
+        if isinstance(t, numbers.Number):
+            t = np.array([t])
         repeated_ts = np.repeat(
             t.reshape([1] + list(t.shape)), len(self.freqs), axis=0)
         reshaped_freqs = (
@@ -78,3 +88,16 @@ class TrigPoly(object):
             return TrigPoly(new_freqs, new_coeffs)
         else:
             assert False
+
+
+class MultiTrigPoly(object):
+
+    def __init__(self, polys):
+        assert all(isinstance(p, TrigPoly) for p in polys)
+        self.polys = polys
+
+    def eval(self, t):
+        return np.stack([p(t) for p in self.polys], axis=0)
+
+    def __call__(self, t):
+        return self.eval(t)

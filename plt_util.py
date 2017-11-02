@@ -8,7 +8,11 @@ def plot_trig_poly_magnitude(p, ax=None, points=200, c='blue'):
     ax = ax or plt.gca()
 
     ts = np.linspace(0.0, 1.0, points)
-    ys = np.absolute(p(ts))
+    values = p(ts)
+    if len(values.shape) == 1:
+        ys = np.absolute(values)
+    else:
+        ys = np.linalg.norm(values, axis=0)
 
     ax.plot(ts, ys, c=c)
 

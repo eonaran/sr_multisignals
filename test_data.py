@@ -1,14 +1,29 @@
 import numpy as np
 
 
+def _complex_gaussian():
+    x, y = np.random.normal(loc=0.0, scale=1.0, size=2)
+    return x + y * 1j
+
+
 def uniform_sign_pattern_1d(size):
     ret = []
     for _ in range(size):
-        x, y = np.random.normal(loc=0.0, scale=1.0, size=2)
-        norm = np.sqrt(x ** 2 + y ** 2)
-        x, y = x / norm, y / norm
-        ret.append(x + y * 1j)
+        z = _complex_gaussian()
+        ret.append(z / np.linalg.norm(z))
     return np.array(ret)
+
+
+def uniform_sign_pattern_multidim(size1, size2, orthogonal=False):
+    if orthogonal:
+        assert False
+    else:
+        ret = np.zeros((size1, size2)).astype(np.complex128)
+        for i in range(size1):
+            for j in range(size2):
+                ret[i, j] = _complex_gaussian()
+        norms = np.linalg.norm(ret, axis=1)
+        return (ret.T / norms).T
 
 
 def uniform_supports(size, min_separation=None, max_iters=10000):
