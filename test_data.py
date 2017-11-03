@@ -33,9 +33,11 @@ def uniform_supports(size, min_separation=None, max_iters=10000):
     while not good_result and iters < max_iters:
         result = np.random.random(size=size)
         sorted_result = np.array(sorted(result))
+        this_min_separation = min(
+            np.min(sorted_result[1:] - sorted_result[:-1]),
+            1.0 + sorted_result[0] - sorted_result[-1])
         if (min_separation is None or
-                np.min(sorted_result[1:] - sorted_result[:-1]) >=
-                min_separation):
+                this_min_separation >= min_separation):
             good_result = True
             break
         iters += 1

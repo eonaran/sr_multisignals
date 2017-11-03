@@ -111,7 +111,8 @@ def validate(support, sign_pattern, interpolator, grid_pts=1e5):
     for t in support:
         left_ix = np.searchsorted(grid, t)
         grid_magnitudes[left_ix] = np.ma.masked
-        grid_magnitudes[left_ix + 1] = np.ma.masked
+        grid_magnitudes[(left_ix + 1) % grid_magnitudes.shape[0]] = (
+            np.ma.masked)
 
     bound_achieved = np.all(grid_magnitudes < 1.0)
 
