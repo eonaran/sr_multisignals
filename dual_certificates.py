@@ -64,6 +64,9 @@ def interpolate_multidim(support, sign_pattern, kernel):
     n = support.shape[0]
     m = sign_pattern.shape[1]
 
+    kernel1 = kernel.derivative()
+    kernel2 = kernel1.derivative()
+    
     time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
     kernel_values = kernel(time_deltas)
 
@@ -76,6 +79,39 @@ def interpolate_multidim(support, sign_pattern, kernel):
     return MultiTrigPoly([
         sum(
             [kernel.shift(-t) * c for c, t in zip(coeffs, support)],
+            TrigPoly.zero())
+        for coeffs in coeffss])
+
+def interpolate_multidim_wDer(support, sign_pattern, kernel):
+    assert support.shape[0] == sign_pattern.shape[0]
+    assert np.all(
+        np.absolute(
+            np.sum(np.absolute(sign_pattern) ** 2, axis=1) - 1.0) < 1e-10)
+
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    kernel1 = kernel.derivative()
+    kernel2 = kernel1.derivative()
+    
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+    kernel_values = kernel(time_deltas)
+    kernel1_values = kernel1(time_deltas)
+    kernel2_values = kernel2(time_deltas)
+    problem_mx = np.bmat([
+        [kernel_values, kernel1_values],
+        [kernel1_values, kernel2_values]]) 
+    
+    coeffss = []
+    for k in range(m):
+        single_sign_pattern = sign_pattern[:, k]
+        problem_obj = np.hstack([single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
+        coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+
+    return MultiTrigPoly([
+        sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
+            TrigPoly.zero()) +
+        sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
             TrigPoly.zero())
         for coeffs in coeffss])
 
