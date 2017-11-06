@@ -12,6 +12,7 @@ def point_probability(support_fn, sign_pattern_fn, kernel, interpolation_fn,
     for _ in range(num_experiments):
         support = support_fn()
         if support is None:
+            # num_successes += 1
             continue
         sign_pattern = sign_pattern_fn()
         interpolator = interpolation_fn(support, sign_pattern, kernel)
@@ -24,11 +25,13 @@ def point_probability(support_fn, sign_pattern_fn, kernel, interpolation_fn,
 
 def grid_probabilities(support_fn, sign_pattern_fn, kernel, interpolation_fn,
                        num_support_points_grid, minimum_separation_grid,
-                       num_experiments=10):
+                       num_experiments=10, verbose=False):
     results = np.zeros(
         (len(num_support_points_grid), len(minimum_separation_grid)))
     for i, num_support_points in enumerate(num_support_points_grid):
         for j, min_separation in enumerate(minimum_separation_grid):
+            if verbose:
+                print i, j
             this_support_fn = functools.partial(
                 support_fn, num_support_points, min_separation=min_separation)
             this_sign_pattern_fn = functools.partial(
