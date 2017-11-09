@@ -133,7 +133,7 @@ def validate(support, sign_pattern, interpolator, grid_pts=1e5):
         values_achieved = (
             values_achieved and
             np.all(np.absolute(
-                interpolator(support[i]) - sign_pattern_slice) < _EPSILON))
+                interpolator(support[i]).T - sign_pattern_slice) < _EPSILON))
 
     grid = np.linspace(0.0, 1.0, grid_pts)
     grid_values = interpolator(grid)

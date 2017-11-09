@@ -25,7 +25,7 @@ def point_probability(support_fn, sign_pattern_fn, kernel, interpolation_fn,
 
 def grid_probabilities(support_fn, sign_pattern_fn, kernel, interpolation_fn,
                        num_support_points_grid, minimum_separation_grid,
-                       num_experiments=10, verbose=False):
+                       num_experiments=10, multiDim = False, m=1,  verbose=False):
     results = np.zeros(
         (len(num_support_points_grid), len(minimum_separation_grid)))
     for i, num_support_points in enumerate(num_support_points_grid):
@@ -34,8 +34,12 @@ def grid_probabilities(support_fn, sign_pattern_fn, kernel, interpolation_fn,
                 print i, j
             this_support_fn = functools.partial(
                 support_fn, num_support_points, min_separation=min_separation)
-            this_sign_pattern_fn = functools.partial(
-                sign_pattern_fn, num_support_points)
+            if multiDim:
+                this_sign_pattern_fn = functools.partial(
+                    sign_pattern_fn, num_support_points,m)
+            else:
+                this_sign_pattern_fn = functools.partial(
+                    sign_pattern_fn, num_support_points)                    
             results[i, j] = point_probability(
                 this_support_fn,
                 this_sign_pattern_fn,
@@ -43,3 +47,4 @@ def grid_probabilities(support_fn, sign_pattern_fn, kernel, interpolation_fn,
                 interpolation_fn,
                 num_experiments=num_experiments)
     return results
+
