@@ -7,6 +7,7 @@ class TrigPoly(object):
 
     def __init__(self, freqs, coeffs):
         assert len(freqs) == len(coeffs)
+        self.freqs_hash = hash(tuple(freqs))
         self.freqs = np.array(freqs)
         self.coeffs = np.array(coeffs)
         self.coeff_dict = {f: c for f, c in zip(freqs, coeffs)}
@@ -41,6 +42,7 @@ class TrigPoly(object):
             self.freqs.reshape([len(self.freqs)] + [1] * len(t.shape)))
         reshaped_coeffs = (
             self.coeffs.reshape([len(self.coeffs)] + [1] * len(t.shape)))
+
         return np.sum(
             reshaped_coeffs *
             np.exp(2.0 * np.pi * 1j * repeated_ts * reshaped_freqs),
@@ -59,6 +61,9 @@ class TrigPoly(object):
         return self.eval(t)
 
     def __add__(self, other):
+        if self.freqs_hash == other.freqs_hash:
+            return TrigPoly(self.freqs, self.coeffs + other.coeffs)
+
         all_freqs = sorted(set(self.freqs) | set(other.freqs))
         all_coeffs = [
             self.coeff_dict.get(f, 0.0) + other.coeff_dict.get(f, 0.0)

@@ -96,6 +96,20 @@ class CircleInterval(object):
         return 'CircleInterval(%.2f, %.2f)' % (self.start, self.end)
 
 
+def jittered_supports(
+        size,
+        min_separation,
+        jitter_ratio=0.75,
+        jitter_factor=100):
+    jitter = min_separation / jitter_factor
+    base = np.linspace(min_separation / 2.0, (size + 0.5) * min_separation, size)
+    offsets = np.cumsum(
+        jitter *
+        np.random.random(size=size) *
+        (np.random.random(size=size) < jitter_ratio))
+    return base + offsets
+
+
 def uniform_supports(size, min_separation=None, max_iters=1000):
     if min_separation is None:
         min_separation = 0.0

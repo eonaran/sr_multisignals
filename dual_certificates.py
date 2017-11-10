@@ -49,6 +49,16 @@ def interpolate_with_derivative(support, sign_pattern, kernel):
     coeffs = np.linalg.solve(problem_mx, problem_obj)
 
     return (
+        TrigPoly(
+            kernel.freqs,
+            sum(kernel.coeffs * np.exp(2.0 * np.pi * 1j * kernel.freqs * -t) * c
+                for c, t in zip(coeffs[:n], support))) +
+        TrigPoly(
+            kernel1.freqs,
+            sum(kernel1.coeffs * np.exp(2.0 * np.pi * 1j * kernel1.freqs * -t) * c
+                for c, t in zip(coeffs[n:], support))))
+
+    return (
         sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
             TrigPoly.zero()) +
         sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
@@ -108,6 +118,17 @@ def interpolate_multidim_wDer(support, sign_pattern, kernel):
         coeffss.append(np.linalg.solve(problem_mx, problem_obj))
 
     return MultiTrigPoly([
+        (TrigPoly(
+            kernel.freqs,
+            sum(kernel.coeffs * np.exp(2.0 * np.pi * 1j * kernel.freqs * -t) * c
+                for c, t in zip(coeffs[:n], support))) +
+         TrigPoly(
+             kernel1.freqs,
+             sum(kernel1.coeffs * np.exp(2.0 * np.pi * 1j * kernel1.freqs * -t) * c
+                 for c, t in zip(coeffs[n:], support))))
+        for coeffs in coeffss])
+
+    return MultiTrigPoly([
         sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
             TrigPoly.zero()) +
         sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
@@ -123,7 +144,7 @@ def interpolate_multidim_wDer(support, sign_pattern, kernel):
 _EPSILON = 1e-10
 
 
-def validate(support, sign_pattern, interpolator, grid_pts=1e5):
+def validate(support, sign_pattern, interpolator, grid_pts=1e3):
     values_achieved = True
     for i in range(support.shape[0]):
         if len(sign_pattern.shape) == 1:
@@ -145,7 +166,7 @@ def validate(support, sign_pattern, interpolator, grid_pts=1e5):
     grid_magnitudes = np.ma.array(grid_magnitudes)
     for t in support:
         left_ix = np.searchsorted(grid, t)
-        grid_magnitudes[left_ix] = np.ma.masked
+        grid_magnitudes[left_ix % grid_magnitudes.shape[0]] = np.ma.masked
         grid_magnitudes[(left_ix + 1) % grid_magnitudes.shape[0]] = (
             np.ma.masked)
 
