@@ -48,14 +48,40 @@ class TrigPoly(object):
             np.exp(2.0 * np.pi * 1j * repeated_ts * reshaped_freqs),
             axis=0)
 
+    def conjugate(self):
+        return TrigPoly([-f for f in self.freqs], np.conj(self.coeffs))
+
+    def real(self):
+        return (self + self.conjugate()) * 0.5
+
+    def imag(self):
+        return (self + self.conjugate() * (-1.0)) * (-0.5 * 1j)
+
     def shift(self, t):
         """Returns the trig poly time-shifted by +t."""
         new_coeffs = self.coeffs * np.exp(2.0 * np.pi * 1j * self.freqs * t)
         return TrigPoly(self.freqs, new_coeffs)
 
+    def sum_shifts(self, shifts, coeffs):
+        return TrigPoly(
+            self.freqs,
+            sum(self.coeffs * np.exp(2.0 * np.pi * 1j * self.freqs * t) * c
+                for c, t in zip(coeffs, shifts)))
+
     def derivative(self):
         return TrigPoly(
             self.freqs, self.coeffs * 2.0 * np.pi * 1j * self.freqs)
+
+    def inner_of_shifts(self, t1, t2):
+        return np.sum(
+            np.absolute(self.coeffs) ** 2 *
+            np.exp(2.0 * np.pi * 1j * (t2 - t1) * self.freqs))
+
+    def inner_of_shift_and_derivative_shift(self, t1, t2):
+        return np.sum(
+            np.absolute(self.coeffs) ** 2 *
+            np.exp(2.0 * np.pi * 1j * (t2 - t1) * self.freqs) *
+            2.0 * np.pi * 1j * self.freqs)
 
     def __call__(self, t):
         return self.eval(t)

@@ -1,7 +1,9 @@
 """Tools for creating interpolation-based dual certificates."""
 
+from trig_poly import MultiTrigPoly
+
 import numpy as np
-from trig_poly import TrigPoly, MultiTrigPoly
+from sklearn.linear_model import Lasso
 
 
 #
@@ -21,48 +23,85 @@ def interpolate(support, sign_pattern, kernel):
 
     coeffs = np.linalg.solve(kernel_values, sign_pattern)
 
-    return sum(
-        [kernel.shift(-t) * c for c, t in zip(coeffs, support)],
-        TrigPoly.zero())
+    return kernel.sum_shifts(-support, coeffs)
 
 
-def interpolate_with_derivative(support, sign_pattern, kernel):
+def interpolate_with_derivative(
+        support, sign_pattern, kernel, tangent_constraint=False):
     assert support.shape == sign_pattern.shape
     assert np.all(np.absolute(np.absolute(sign_pattern) - 1.0) < 1e-10)
 
     n = support.shape[0]
 
-    kernel1 = kernel.derivative()
-    kernel2 = kernel1.derivative()
-
     # time_deltas[i, j] = t_i - t_j
     time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
+    # NOTE: This is assuming that the kernel is real-valued.
+
+    kernel_1 = kernel.derivative()
+    kernel_2 = kernel_1.derivative()
+
     kernel_values = kernel(time_deltas)
-    kernel1_values = kernel1(time_deltas)
-    kernel2_values = kernel2(time_deltas)
+    kernel_1_values = kernel_1(time_deltas)
+    kernel_2_values = kernel_2(time_deltas)
 
-    problem_mx = np.bmat([
-        [kernel_values, kernel1_values],
-        [kernel1_values, kernel2_values]])
-    problem_obj = np.hstack([sign_pattern, np.zeros(sign_pattern.shape[0])])
+    sign_pattern_real = np.real(sign_pattern)
+    sign_pattern_imag = np.imag(sign_pattern)
 
-    coeffs = np.linalg.solve(problem_mx, problem_obj)
+    zeros = np.zeros((n, n))
+
+    # Build linear constraint objects
+    A = np.bmat([
+        [kernel_values, kernel_1_values, zeros, zeros],
+        [zeros, zeros, kernel_values, kernel_1_values],
+        [sign_pattern_real.reshape((n, 1)) * kernel_1_values,
+         sign_pattern_real.reshape((n, 1)) * kernel_2_values,
+         sign_pattern_imag.reshape((n, 1)) * kernel_1_values,
+         sign_pattern_imag.reshape((n, 1)) * kernel_2_values]]).astype(
+             np.float64)
+    y = np.hstack(
+        [sign_pattern_real,
+         sign_pattern_imag,
+         np.zeros(sign_pattern.shape[0])])
+
+    # Build objective quadratic form corresponding to interpolator L2 norm:
+    S = np.zeros((4*n, 4*n)).astype(np.complex128)
+    for i in range(n):
+        for j in range(n):
+            # TODO: Make sure it's ok to cast to real here
+            kernel_value = kernel.inner_of_shifts(
+                support[i], support[j])
+            kernel_1_value = kernel_1.inner_of_shifts(support[i], support[j])
+            cross_value_1 = kernel.inner_of_shift_and_derivative_shift(
+                support[i], support[j])
+            cross_value_2 = kernel.inner_of_shift_and_derivative_shift(
+                support[j], support[i])
+
+            # Real coefficients:
+            S[i, j] = kernel_value
+            S[n + i, n + j] = kernel_1_value
+            S[n + i, j] = cross_value_1
+            S[i, n + j] = cross_value_2
+
+            # Imaginary coefficients:
+            S[2 * n + i, 2 * n + j] = kernel_value
+            S[3 * n + i, 3 * n + j] = kernel_1_value
+            S[3 * n + i, 2 * n + j] = cross_value_1
+            S[2 * n + i, 3 * n + j] = cross_value_2
+    S = (S + S.T).real * 0.5
+
+    # Get least-L2 solution with explicit formula
+    # TODO: Way to avoid inversion in here?
+    S_inv = np.linalg.inv(S)
+    AS_invAT = np.linalg.multi_dot([A, S_inv, A.T])
+    x_intermediate = np.linalg.solve(AS_invAT, y)
+    coeffs = np.ravel(np.linalg.multi_dot([S_inv, A.T, x_intermediate]))
 
     return (
-        TrigPoly(
-            kernel.freqs,
-            sum(kernel.coeffs * np.exp(2.0 * np.pi * 1j * kernel.freqs * -t) * c
-                for c, t in zip(coeffs[:n], support))) +
-        TrigPoly(
-            kernel1.freqs,
-            sum(kernel1.coeffs * np.exp(2.0 * np.pi * 1j * kernel1.freqs * -t) * c
-                for c, t in zip(coeffs[n:], support))))
-
-    return (
-        sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
-            TrigPoly.zero()) +
-        sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
-            TrigPoly.zero()))
+        kernel.sum_shifts(-support, coeffs[:n]) +
+        kernel_1.sum_shifts(-support, coeffs[n:2*n]) +
+        kernel.sum_shifts(-support, coeffs[2*n:3*n] * 1j) +
+        kernel_1.sum_shifts(-support, coeffs[3*n:] * 1j))
 
 
 def interpolate_multidim(support, sign_pattern, kernel):
@@ -84,13 +123,15 @@ def interpolate_multidim(support, sign_pattern, kernel):
             np.linalg.solve(kernel_values, single_sign_pattern))
 
     return MultiTrigPoly([
-        sum(
-            [kernel.shift(-t) * c for c, t in zip(coeffs, support)],
-            TrigPoly.zero())
+        kernel.sum_shifts(-support, coeffs)
         for coeffs in coeffss])
 
 
-def interpolate_multidim_wDer(support, sign_pattern, kernel):
+def interpolate_multidim_wDer(
+        support,
+        sign_pattern,
+        kernel,
+        single_derivative_constraint=False):
     assert support.shape[0] == sign_pattern.shape[0]
     assert np.all(
         np.absolute(
@@ -99,40 +140,38 @@ def interpolate_multidim_wDer(support, sign_pattern, kernel):
     n = support.shape[0]
     m = sign_pattern.shape[1]
 
-    kernel1 = kernel.derivative()
-    kernel2 = kernel1.derivative()
-
     time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
     kernel_values = kernel(time_deltas)
+
+    kernel1 = kernel.derivative()
     kernel1_values = kernel1(time_deltas)
+
+    kernel2 = kernel1.derivative()
     kernel2_values = kernel2(time_deltas)
-    problem_mx = np.bmat([
-        [kernel_values, kernel1_values],
-        [kernel1_values, kernel2_values]])
 
     coeffss = []
-    for k in range(m):
-        single_sign_pattern = sign_pattern[:, k]
-        problem_obj = np.hstack(
-            [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
-        coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+    if single_derivative_constraint:
+        problem_mx = np.bmat([
+            [kernel_values, kernel1_values],
+            [kernel1_values, kernel2_values]])
+        for k in range(m):
+            single_sign_pattern = sign_pattern[:, k]
+            problem_obj = np.hstack([single_sign_pattern, [0.0]])
+            coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+    else:
+        problem_mx = np.bmat([
+            [kernel_values, kernel1_values],
+            [kernel1_values, kernel2_values]])
+        for k in range(m):
+            single_sign_pattern = sign_pattern[:, k]
+            problem_obj = np.hstack(
+                [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
+            coeffss.append(np.linalg.solve(problem_mx, problem_obj))
 
     return MultiTrigPoly([
-        (TrigPoly(
-            kernel.freqs,
-            sum(kernel.coeffs * np.exp(2.0 * np.pi * 1j * kernel.freqs * -t) * c
-                for c, t in zip(coeffs[:n], support))) +
-         TrigPoly(
-             kernel1.freqs,
-             sum(kernel1.coeffs * np.exp(2.0 * np.pi * 1j * kernel1.freqs * -t) * c
-                 for c, t in zip(coeffs[n:], support))))
-        for coeffs in coeffss])
-
-    return MultiTrigPoly([
-        sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
-            TrigPoly.zero()) +
-        sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
-            TrigPoly.zero())
+        kernel.sum_shifts(-support, coeffs[:n]) +
+        kernel1.sum_shifts(-support, coeffs[n:])
         for coeffs in coeffss])
 
 
