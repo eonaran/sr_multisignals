@@ -1,9 +1,14 @@
 import numpy as np
+import random as rn
 
 
 def _complex_gaussian():
     x, y = np.random.normal(loc=0.0, scale=1.0, size=2)
     return x + y * 1j
+
+
+def uniform_sign_pattern_1d_real(size):
+    return np.array([rn.choice([-1.0, 1.0]) for _ in range(size)])
 
 
 def uniform_sign_pattern_1d(size):
@@ -96,18 +101,43 @@ class CircleInterval(object):
         return 'CircleInterval(%.2f, %.2f)' % (self.start, self.end)
 
 
+def lrange(r1, inc, r2):
+    n = ((r2-r1)+2*np.spacing(r2-r1))//inc
+    return np.linspace(r1, r1 + inc*n, n+1)
+
+
 def jittered_supports(
         size,
         min_separation,
-        jitter_ratio=0.75,
-        jitter_factor=100):
+        jitter_ratio=0.5,
+        jitter_factor=10):
     jitter = min_separation / jitter_factor
-    base = np.linspace(min_separation / 2.0, (size + 0.5) * min_separation, size)
+    base = lrange(
+        min_separation * 0.5,
+        min_separation,
+        (size + 1.0) * min_separation)
     offsets = np.cumsum(
         jitter *
         np.random.random(size=size) *
         (np.random.random(size=size) < jitter_ratio))
-    return base + offsets
+    candidate = base[:size] + offsets
+
+    candidate = np.array(sorted([
+        (c if c <= 1.0 else c - 1.0) for c in candidate]))
+
+    if size > 1:
+        candidate_min_separation = min(
+            np.min(candidate[1:] - candidate[:-1]),
+            candidate[0] - candidate[-1] + 1.0)
+    else:
+        candidate_min_separation = float('inf')
+
+    # If the jitter has ruined the minimum separation property, return the base
+    # instead.
+    if candidate_min_separation >= min_separation:
+        return candidate[:size]
+    else:
+        return base[:size]
 
 
 def uniform_supports(size, min_separation=None, max_iters=1000):

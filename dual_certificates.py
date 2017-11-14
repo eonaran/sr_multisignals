@@ -26,8 +26,7 @@ def interpolate(support, sign_pattern, kernel):
     return kernel.sum_shifts(-support, coeffs)
 
 
-def interpolate_with_derivative(
-        support, sign_pattern, kernel, tangent_constraint=False):
+def interpolate_with_derivative(support, sign_pattern, kernel):
     assert support.shape == sign_pattern.shape
     assert np.all(np.absolute(np.absolute(sign_pattern) - 1.0) < 1e-10)
 
@@ -69,6 +68,7 @@ def interpolate_with_derivative(
     cross_inners = kernel.inners_of_shifts_and_derivative_shifts(support)
 
     # Build objective quadratic form corresponding to interpolator L2 norm:
+
     S = np.zeros((4*n, 4*n)).astype(np.complex128)
     S[:n, :n] = kernel_inners
     S[n:2*n, n:2*n] = kernel_1_inners
@@ -118,11 +118,8 @@ def interpolate_multidim(support, sign_pattern, kernel):
         for coeffs in coeffss])
 
 
-def interpolate_multidim_wDer(
-        support,
-        sign_pattern,
-        kernel,
-        single_derivative_constraint=False):
+def interpolate_multidim_with_derivative(
+        support, sign_pattern, kernel):
     assert support.shape[0] == sign_pattern.shape[0]
     assert np.all(
         np.absolute(
@@ -142,23 +139,14 @@ def interpolate_multidim_wDer(
     kernel2_values = kernel2(time_deltas)
 
     coeffss = []
-    if single_derivative_constraint:
-        problem_mx = np.bmat([
-            [kernel_values, kernel1_values],
-            [kernel1_values, kernel2_values]])
-        for k in range(m):
-            single_sign_pattern = sign_pattern[:, k]
-            problem_obj = np.hstack([single_sign_pattern, [0.0]])
-            coeffss.append(np.linalg.solve(problem_mx, problem_obj))
-    else:
-        problem_mx = np.bmat([
-            [kernel_values, kernel1_values],
-            [kernel1_values, kernel2_values]])
-        for k in range(m):
-            single_sign_pattern = sign_pattern[:, k]
-            problem_obj = np.hstack(
-                [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
-            coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+    problem_mx = np.bmat([
+        [kernel_values, kernel1_values],
+        [kernel1_values, kernel2_values]])
+    for k in range(m):
+        single_sign_pattern = sign_pattern[:, k]
+        problem_obj = np.hstack(
+            [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
+        coeffss.append(np.linalg.solve(problem_mx, problem_obj))
 
     return MultiTrigPoly([
         kernel.sum_shifts(-support, coeffs[:n]) +
