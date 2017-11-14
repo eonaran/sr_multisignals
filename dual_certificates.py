@@ -64,30 +64,21 @@ def interpolate_with_derivative(
          sign_pattern_imag,
          np.zeros(sign_pattern.shape[0])])
 
+    kernel_inners = kernel.inners_of_shifts(support)
+    kernel_1_inners = kernel_1.inners_of_shifts(support)
+    cross_inners = kernel.inners_of_shifts_and_derivative_shifts(support)
+
     # Build objective quadratic form corresponding to interpolator L2 norm:
     S = np.zeros((4*n, 4*n)).astype(np.complex128)
-    for i in range(n):
-        for j in range(n):
-            # TODO: Make sure it's ok to cast to real here
-            kernel_value = kernel.inner_of_shifts(
-                support[i], support[j])
-            kernel_1_value = kernel_1.inner_of_shifts(support[i], support[j])
-            cross_value_1 = kernel.inner_of_shift_and_derivative_shift(
-                support[i], support[j])
-            cross_value_2 = kernel.inner_of_shift_and_derivative_shift(
-                support[j], support[i])
-
-            # Real coefficients:
-            S[i, j] = kernel_value
-            S[n + i, n + j] = kernel_1_value
-            S[n + i, j] = cross_value_1
-            S[i, n + j] = cross_value_2
-
-            # Imaginary coefficients:
-            S[2 * n + i, 2 * n + j] = kernel_value
-            S[3 * n + i, 3 * n + j] = kernel_1_value
-            S[3 * n + i, 2 * n + j] = cross_value_1
-            S[2 * n + i, 3 * n + j] = cross_value_2
+    S[:n, :n] = kernel_inners
+    S[n:2*n, n:2*n] = kernel_1_inners
+    S[n:2*n, :n] = cross_inners.T
+    S[:n, n:2*n] = cross_inners
+    S[2*n:3*n, 2*n:3*n] = kernel_inners
+    S[3*n:, 3*n:] = kernel_1_inners
+    S[3*n:, 2*n:3*n] = cross_inners.T
+    S[2*n:3*n, 3*n:] = cross_inners
+    # TODO: Make sure it's ok to cast to real here
     S = (S + S.T).real * 0.5
 
     # Get least-L2 solution with explicit formula

@@ -72,16 +72,32 @@ class TrigPoly(object):
         return TrigPoly(
             self.freqs, self.coeffs * 2.0 * np.pi * 1j * self.freqs)
 
-    def inner_of_shifts(self, t1, t2):
-        return np.sum(
-            np.absolute(self.coeffs) ** 2 *
-            np.exp(2.0 * np.pi * 1j * (t2 - t1) * self.freqs))
+    def inners_of_shifts(self, ts):
+        n = ts.shape[0]
 
-    def inner_of_shift_and_derivative_shift(self, t1, t2):
-        return np.sum(
-            np.absolute(self.coeffs) ** 2 *
-            np.exp(2.0 * np.pi * 1j * (t2 - t1) * self.freqs) *
-            2.0 * np.pi * 1j * self.freqs)
+        # deltas[i, j] = t_i - t_j
+        deltas = (
+            np.outer(ts, np.ones(n)) - np.outer(np.ones(n), ts)
+            ).reshape((n, n, 1)).repeat(len(self.freqs), axis=2)
+
+        return np.einsum(
+            'ijk,k->ij',
+            np.exp(2.0 * np.pi * 1j * deltas * self.freqs),
+            np.absolute(self.coeffs) ** 2)
+
+    def inners_of_shifts_and_derivative_shifts(self, ts):
+        n = ts.shape[0]
+
+        # deltas[i, j] = t_i - t_j
+        deltas = (
+            np.outer(ts, np.ones(n)) - np.outer(np.ones(n), ts)
+            ).reshape((n, n, 1)).repeat(len(self.freqs), axis=2)
+
+        return np.einsum(
+            'ijk,k,k->ij',
+            np.exp(2.0 * np.pi * 1j * deltas * self.freqs),
+            2.0 * np.pi * 1j * self.freqs,
+            np.absolute(self.coeffs) ** 2)
 
     def __call__(self, t):
         return self.eval(t)
