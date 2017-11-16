@@ -2,7 +2,9 @@
 
 from trig_poly import MultiTrigPoly
 
+import mpmath
 import numpy as np
+from scipy import linalg as sp_linalg
 
 
 def _interpolator_norm_quadratic_form(kernel, support):
@@ -30,12 +32,20 @@ def _interpolator_norm_quadratic_form(kernel, support):
     return S
 
 
-def _optimize_quadratic_form(S, A, y):
-    """Maximize x^T S_inv x s.t. Ax = y."""
+def _optimize_quadratic_form(S, A, y, multiplier=1.0):
+    """Maximize x^T S x subject to Ax = y.
+
+    The multiplier is a factor multiplied into S in formulating the linear
+    problem, which can help mitigate ill-conditioned systems (resulting from
+    magnitude discrepancies between S and A).
+    """
     m = A.shape[0]
     n = S.shape[0]
+    # This expression for the solution is derived with Lagrange multipliers,
+    # the multiplier vector of the constraint Ax = y being in the last m
+    # coordinates of the result, which we discard.
     return np.linalg.solve(
-        np.bmat([[S, A.T], [A, np.zeros((m, m))]]),
+        np.bmat([[multiplier * S, A.T], [A, np.zeros((m, m))]]),
         np.hstack([np.zeros(n), y]))[:n]
 
 
@@ -218,7 +228,13 @@ def interpolate_multidim_with_derivative(
     S_diag_block = _interpolator_norm_quadratic_form(kernel, support)
     S = np.kron(np.identity(m), S_diag_block)
 
-    coeffs = _optimize_quadratic_form(S, problem_mx, problem_obj)
+    # This multiplier value is heuristically chosen.
+    multiplier = kernel_1.squared_norm() / kernel.squared_norm() * 1e3
+    coeffs = _optimize_quadratic_form(
+        S,
+        problem_mx,
+        problem_obj,
+        multiplier=multiplier)
 
     return MultiTrigPoly([
         (kernel.sum_shifts(-support, coeffs[4*k*n:(4*k+1)*n]) +
@@ -233,7 +249,7 @@ def interpolate_multidim_with_derivative(
 #
 
 
-_EPSILON = 1e-8
+_EPSILON = 1e-7
 
 
 def validate(support, sign_pattern, interpolator, grid_pts=1e3):

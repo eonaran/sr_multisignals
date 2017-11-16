@@ -68,6 +68,9 @@ class TrigPoly(object):
             sum(self.coeffs * np.exp(2.0 * np.pi * 1j * self.freqs * t) * c
                 for c, t in zip(coeffs, shifts)))
 
+    def squared_norm(self):
+        return np.sum(np.absolute(self.coeffs) ** 2)
+
     def derivative(self):
         return TrigPoly(
             self.freqs, self.coeffs * 2.0 * np.pi * 1j * self.freqs)
