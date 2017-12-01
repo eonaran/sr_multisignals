@@ -289,6 +289,7 @@
 \newcommand{\bA}{\bm A}
 \newcommand{\bB}{\bm B}
 \newcommand{\bD}{\bm D}
+\newcommand{\bF}{\bm F}
 \newcommand{\bG}{\bm G}
 \newcommand{\bH}{\bm H}
 \newcommand{\bP}{\bm P}
@@ -296,8 +297,10 @@
 \newcommand{\bR}{\bm R}
 \newcommand{\bW}{\bm W}
 \newcommand{\bX}{\bm X}
+\newcommand{\bY}{\bm Y}
 \newcommand{\ba}{\bm a}
 \newcommand{\bb}{\bm b}
+\newcommand{\bc}{\bm c}
 \newcommand{\bg}{\bm g}
 \newcommand{\bv}{\bm v}
 \newcommand{\bw}{\bm w}
@@ -317,7 +320,7 @@
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
 
-\title{Super-Resolution of Multiple Signals with Common Support}
+\title{Super-Resolution of Point Sources Down to the Rayleigh Limit from Multiple Observations}
 
 \begin{document}
 
@@ -327,29 +330,57 @@
 
 \section{Introduction}
 
-\subsection{Single Observation Recovery}
+\subsection{Single Observation Problem Statement}
 
-We are interested in the following problem: a signal is observed at a finite set of times $t_j \in T \subset [0, 1]$ with amplitudes $a_j \in \CC$, forming a time-domain ideal observation
-\[ x = \sum_{t_j \in T} a_j\delta_{t_j}. \]
-If the measurements are low-resolution, the actual observation may be modeled by convolving with a low-pass point spread function (PSF) $\phi$, giving
-\[ x_L = (\phi * x)(t) = \sum_{t_j \in T} a_j \phi(t - t_j). \]
-It is convenient to simplify and assume that in the Fourier domain $\phi$ is a constant supported on $[-f_c, f_c]$, and that what we really observe is finitely many samples of the Fourier transform of $x$,
-\[ y(k) = (\sF_{[-f_c, f_c]} x_L)(k) = \int_0^1 e^{-2\pi i k t} x_L(t) dt = \sum a_j e^{-2\pi i k t_j} \]
-for $k \in \ZZ \cap [-f_c, f_c]$.
+Suppose we observe a true signal whose representation in the physical domain is
+\[ x^*(t) = \sum_{j = 1}^s a_j \delta_{t_j}(t), \]
+for $t \in \TT$ where $\TT = \RR / \ZZ$, which we will usually think of as the unit interval $[0, 1]$ with its endpoints identified, and $T = \{t_j\}_{j = 1}^s \subset \TT$ a discrete support set.
+In the Fourier domain, this signal takes the form
+\[ \widehat{x^*}(k) = \sum_{j = 1}^s a_j \exp(-2\pi i k t_j) \]
+for $k \in \ZZ$.
 
-\subsection{Dual Certificate}
+Now, we are interested in recovering this true signal $x$ from an observation that has been corrupted due to poor resolution, which we treat as convolution of $x(t)$ with a point-spread function $\phi(t)$.
+We then observe the signal
+\[ (\phi * x^*)(t) = \sum_{j = 1}^sa_j \phi(t - t_j). \]
+In the simplest case, $\phi$ is a Dirichlet kernel with cutoff frequency $f_c$, in which case the Fourier transform of the above is simply the truncation of the Fourier transform of $x^*$.
+Calling the Fourier transform of the observed signal $y$, we have
+\[ y(k) = \left(\sum_{j = 1}^s a_j \exp(-2\pi i k t_j)\right)\One\{|k| \leq f_c \}. \]
+We may then think of the data we observe as simply the $2f_c + 1$ values $y(-f_c), \dots, y(f_c)$.
+We write $\sF_n$ for the sensing operator mapping $x^*$ to these $n$ Fourier coefficients.
+A popular technique for solving this problem is \emph{total variation minimization}, which attempts to recover $x^*$ by solving the convex problem
+\[ \argmin_x \|x\|_{\mathsf{TV}} \text{ subject to } \sF_nx = y. \]
+
+\subsection{Extension to Multiple Observations}
+
+We now consider a slight modification of the problem presented in the previous section, where we make \emph{several} observations signals sharing the support $T = \{t_1, \dots, t_s\}$ of $x^*$, but having varying amplitudes $a_j$.
+To formalize this, our true signal is now
+\begin{equation}
+    x^*_k(t) = \sum_{j = 1}^s a_{j, k} \delta_{t_j} \text{ for } k \in \{1, \dots, m\},
+\end{equation}
+and our observations are $y_{\ell, k} = (\sF_n x^*_k)_{\ell}$ for $\ell \in \{-f_c, \dots, f_c\}$ and $k \in \{1, \dots, m\}$.
+We think of the $a_{j, k}$ as organized into a matrix $\bA \in \CC^{s \times m}$ and the  $y_{\ell, k}$ as organized into a matrix $\bY \in \CC^{n \times m}$.
+The \emph{group total variation minimization} is the natural extension of the previous convex problem to this setting, where we solve
+\begin{equation}
+    \argmin_x \|x\|_{\mathsf{gTV}} \text{ subject to } \left[\begin{array}{cccc}\sF_nx_1 & \sF_n x_2 \cdots \sF_n x_m \end{array}\right] = \bY.
+\end{equation}
+
+\subsection{Dual Certificates}
 
 \begin{definition}
-    Let $\mu \subset \CC$ denote the complex unit circle.
-    A \emph{sign pattern} on a set is an assignment of points of $\mu$ to each point of the set.
+    Let $\mu^0 \subset \CC$ denote the complex unit circle.
+    A \emph{sign pattern} on a set is an assignment of points of $\mu^0$ to each point of the set.
 \end{definition}
 
 \begin{definition}
-    For a sign pattern $v \in \mu^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$ given by
-    \[ q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t} \]
+    For a sign pattern $v \in (\mu^0)^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$ given by
+    \begin{equation}
+        q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t}
+    \end{equation}
     is a \emph{(single-observation) dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$, and $|q(t)| < 1$ for $t \notin T$.
 \end{definition}
-If a dual certificate for the sign pattern $v = \frac{a_j}{|a_j|}$ exists, it follows that $x$ is the unique solution of TV minimization for the super-resolution problem.
+\begin{proposition}[TV Norm Minimization Duality]
+If a dual certificate for the sign pattern $v_j = \frac{a_j}{|a_j|}$ exists, then $x^*$ is the unique solution of TV minimization for the super-resolution problem.
+\end{proposition}
 Therefore, to prove the effectiveness of TV minimization it suffices to show that a dual certificate exists under some conditions on $T$.
 The main result of \cite{fernandez2016super} is thus equivalent to the following.
 \begin{theorem}[Proposition 2.3 of \cite{fernandez2016super}]
@@ -357,90 +388,95 @@ The main result of \cite{fernandez2016super} is thus equivalent to the following
     \label{thm:single-obs-recovery}
 \end{theorem}
 
-\subsection{Multiple Observation Recovery}
-
-\section{Single-Observation Recovery Proof}
-
-In this section, we outline the proof from \cite{fernandez2016super} of Theorem~\ref{thm:single-obs-recovery}.
-It is most intuitive to view the dual certificate as the result of a sequence of increasingly more and more refined constructions, noting at each point what does not suffice about the tools accumulated.
-
-\subsection{Dirichlet Kernel Interpolation}
-
+The same ideas extend to the multiple observation case in a straightforward fashion.
 \begin{definition}
-    The \emph{Dirichlet kernel with cutoff $f$} is the periodic function $K_f: \TT \to \RR$ defined by
-    \[ K_f(t) = \frac{1}{2f + 1} \sum_{k = -f}^f e^{2\pi i k t}. \]
+    Let $\mu^{m - 1} \subset \CC^m$ denote the $m$-dimensional complex unit sphere.
+    A \emph{$m$-dimensional sign pattern} on a set is an assignment of points of $\mu^{m - 1}$ to each point of the set.
 \end{definition}
-The Dirichlet kernels are useful in our situation because they simultaneously satisfy two desirable properties: (1) they form a family of approximations to the identity as $f_c \to \infty$, and (2) they are low-pass for each fixed $f_c$.
-Thus, these will be the basic building blocks of our dual certificates.
-
-Concretely, a simple way to interpolate the sign pattern $v \in \mu^T$ is to declare that
-\[ q(t) = \sum_{t_j \in T} \alpha_j K_{f_c}(t - t_j), \]
-then solve the linear algebra problem arising for the $\alpha_j$ when we require that $q(t_j) = v_j$.
-However, in this case we will run into problems ensuring that $|q(t)| < 1$ when $t \notin T$, since the tail of $K_{f_c}$ decays slowly, thus roughly speaking $q(t)$ has non-negligible contributions from many of the $t_j \in T$.
-  
-\subsection{Multi-Dirichlet Kernel Interpolation}
-
 \begin{definition}
-    The \emph{multi-Dirichlet Kernel with cutoffs $f\bm \gamma$} for $\bm\gamma \in \RR^p_{\geq 0}$ satisfying $\sum_{j = 1}^p \gamma_j = 1$ is
-    \[ K_{f\bm\gamma}(t) = \prod_{j = 1}^p K_{\gamma_j f}(t). \]
-    The constraint on $\bm \gamma$ ensures that $K_{f\bm\gamma}$ is indeed $f$-low-pass.
+    For a sign pattern $v \in (\mu^{m - 1})^T$, a low-pass trigonometric polynomial $q: \TT \to \CC^m$ given by $q(t) = (q_1(t), \dots, q_m(t))$ and
+    \begin{equation}
+        q_\ell(t) = \sum_{k = -f_c}^{f_c} c_k \exp(2\pi i k t) \text{ for } \ell \in \{1, \dots, m\}
+    \end{equation}
+    is an \emph{$m$-observation dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$, and $\|q(t)\|_{\ell^2} < 1$ for $t \notin T$.
 \end{definition}
-The more spread out the coordinates of $\bm\gamma$ are, the less sharp $K_{f\bm\gamma}(t)$ is around $t = 0$, but the faster its tail decays.
-Thus, introducing this extra parameter lets us control the trade-off between the quality of the interpolation vs.\ the control over the off-support magnitude.
+\begin{proposition}[gTV Norm Minimization Duality]
+    If a dual certificate for the sign pattern $v_j = a_{j, \bullet} / \|a_{j, \bullet}\|_{\ell^2}$ exists, then $x^*$ is the unique solution of gTV minimization for the super-resolution problem.
+\end{proposition}
+However, while numerical experiments in \cite{fernandez2016super} suggest that when the amplitudes $\bA$ are taken randomly then recovery is possible down to a lower critical minimum separation, the same uniform argument cannot apply---indeed, it is always possible that the observations $a_{j, \bullet}$ are all identical, in which case clearly it cannot be possible to recover $x^*$ any more effectively than in the one observation case.
+Thus, to show that gTV norm minimization substantially improves on TV norm minimization, it is necessary to make some probabilistic assumptions about the data generating process.
 
-\subsection{Interpolation with Derivative}
+\section{Dual Certificate Construction}
 
-The remaining problem is rather technical: though our interpolation will now be exact and the magnitude $|q(t)|$ will be controlled away from each $t_j$, very near each $t_j$ we require $|q(t)|$ to achieve a local maximum, and there is no reason to think that the present construction will achieve this.
-To this end, we simultaneously interpolate with the kernel and its derivative, and add an additional constraint that $q(t)$ has a critical point at each $t_j$ (the other aspects of our construction will then let us ensure that the critical point is in fact a local maximum of the magnitude).
-We take
-\[ q(t) = \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}(t - t_j) + \beta_j K_{f_c \bm \gamma}^\prime(t - t_j)\right\}, \]
-and solve the larger linear algebra problem
-\begin{align*}
-  v_k &= \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}(t_k - t_j) + \beta_j K_{f_c \bm \gamma}^\prime(t_k - t_j)\right\} \\
-  0 &= \sum_{t_j \in T} \left\{ \alpha_j K_{f_c \bm \gamma}^{\prime}(t_k - t_j) + \beta_j K_{f_c \bm \gamma}^{\prime\prime}(t_k - t_j)\right\}
-\end{align*}
-to obtain the coefficients $\alpha_j, \beta_j$.
+Recall that we are interested in building a low-pass trigonometric polynomial $q: \TT \to \CC^m$ interpolating the points $(t_j, v_j)$ while remaining strictly inside the unit sphere in $\CC^m$ elsewhere.
+The idea of the construction of \cite{fernandez2016super} when $m = 1$ is to build $q$ via kernel interpolation, and adjust it so that $q^\prime(t_j) = 0$ for each $j$, which one would hope might encourage the polynomial to remain in the unit sphere.
+The naive extension of this to the $m$-dimensional is to require $\nabla q(t_j) = 0$ for each $t_j$.
+However, numerical experiments show that the regime where this construction succeeds essentially does not depend on $m$, which is not surprising---after all, this is repeating the one-dimensional construction in each coordinate.
+We propose a different dual certificate, which does succeed numerically in certifying reconstruction down to the Rayleigh limit as $m \to \infty$.
 
-This is the basic construction used in the proof of Theorem~\ref{thm:single-obs-recovery}.
-There are two things left to verify:
+\subsection{Step 1: Relaxing Gradient Condition}
+
+The first observation is that the condition $\nabla q(t_j) = 0$ is overkill for encouraging $q$ to remain in the unit sphere.
+Intuitively, all that is really necessary is that $\nabla q(t_j)$ not have a component pointing out of the sphere, i.e.\ in the direction of $v_j$.
+Thus, a reasonable condition is to require $\nabla q(t_j)$ and $v_j$, viewed as vectors, to be orthogonal.
+However, it is not possible to express this constraint in complex arithmetic, so we must rewrite the dual certificate in terms of its real and complex parts (each of which is still low-pass).
+
+Thus, we write $q_\ell(t) = q_\ell^R(t) + iq_\ell^I(t)$ for real-valued low-pass trigonometric polynomials $q_\ell^R$ and $q_\ell^I$.
+We combine these into a single real-valued $2m$-dimensional trigonometric polynomial,
+\begin{equation}
+    \tilde{q}(t) = (q_1^R(t), q_1^I(t), \dots, q_m^R(t), q_m^I(t)) \in \RR^{2m}.
+\end{equation}
+Likewise writing $v_{j, \ell} = v_{j, \ell}^R + iv_{j, \ell}^I$ and $\tilde{v}_j = (v_{j, 1}^R, v_{j, 1}^I, \dots, v_{j, m}^R, v_{j, m}^I)$, we can express the interpolation conditions that the dual certificate $q$ must satisfy in terms of these new variables in essentially the same way: $\tilde{q}(t_j) = \tilde{v}_j$, and $\|\tilde{q}(t)\|_{\ell^2} < 1$ for all $t \notin T$.
+We can now formulate the conditions we will require of our interpolant.
 \begin{enumerate}
-\item The linear algebra problem above has a solution $(\bm \alpha, \bm\beta)$, which is fairly well-behaved.
-\item $|q(t)| < 1$ for all $t \notin T$.
+\item[I1.] $\tilde{q}(t_j) = \tilde{v}_j$ for $j \in \{1, \dots, m\}$.
+\item[I2.] $\la \nabla \tilde{q}(t_j), \tilde{v}_j \ra = 0$ for $j \in \{1, \dots, m\}$.
 \end{enumerate}
-The next two sections will outline the proofs of these statements.
-Of particular interest is which proofs use which assumptions on $\Delta(T)$, and the relationships between the bounds involved.
 
-\subsection{Solving for Interpolation Coefficients}
-Defining matrices
-\begin{align*}
-  \bD^{(0)}_{jk} &= K_{f_c \bm \gamma}(t_k - t_j), \\
-  \bD^{(1)}_{jk} &= K_{f_c \bm \gamma}^\prime(t_k - t_j), \\
-  \bD^{(2)}_{jk} &= K_{f_c \bm \gamma}^{\prime\prime}(t_k - t_j),
-\end{align*}
-and the block matrix
-\[ \bD = \left[\begin{array}{cc} \bD^{(0)} & \bD^{(1)} \\ \bD^{(1)} & \bD^{(2)} \end{array}\right], \]
-the linear algebra problem for the interpolation coefficients may be written
-\[ \bD\left[\begin{array}{c} \bm \alpha \\ \bm \beta \end{array}\right] = \left[\begin{array}{c} \bm v \\ \bm 0 \end{array}\right]. \]
-There are then two things to verify.
-\begin{lemma}
-    $\bD$ is invertible.
-\end{lemma}
-\begin{lemma}
-    Defining
-    \[ \left[\begin{array}{c} \bm \alpha \\ \bm \beta \end{array}\right] \coloneqq \bD^{-1}\left[\begin{array}{c} \bm v \\ \bm 0 \end{array}\right], \]
-    these $\bm\alpha$, $\bm\beta$ satisfy some $\ell^\infty$ bounds.
-\end{lemma}
-In the random sign pattern setting, we will have $\bv$ be a random variable, and therefore $\bm \alpha$ and $\bm\beta$ will be random as well.
-In particular, if $\bv$ is close to Gaussian, then so are $\bm\alpha$ and $\bm\beta$, with covariance that we can write down in terms of $\bD^{-1}$.
-There are many tools for bounding the supremum of a Gaussian vector, so we might hope to improve the bounds on $\bm\alpha$ and $\bm\beta$ in the random case.
+\subsection{Step 2: Kernel Interpolation}
 
-This section of the argument in \cite{fernandez2016super} depends \emph{only} on the lower bound $f_c \geq 10^3$.
-Thus, the most we can hope for from the above sketch is to reduce this number, or improve the resulting bounds on $\|\bm\alpha\|_\infty, \|\bm\beta\|_\infty$.
-The latter is more helpful, since it feeds into the off-support bounds where it plays an important role.
+We now proceed just as in \cite{fernandez2016super}: fix a real-valued low-pass kernel $K$, and define
+\begin{align}
+  q_\ell^R(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^R K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^R K^\prime(t - t_j), \\
+  q_\ell^I(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^I K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^I K^\prime(t - t_j),
+\end{align}
+for coefficients $\alpha_{j, \ell}^R, \alpha_{j, \ell}^I, \beta_{j, \ell}^R, \beta_{j, \ell}^I \in \RR$ to be determined.
+Conditions I1 and I2 from the previous part may now be expressed as a system of linear constraints on these coefficients, which we introduce some notation to write down concisely.
+\begin{definition}
+    For a function $K: \TT \to \RR$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bD(K, T) \in \RR^{s \times s}$ to be the matrix whose entry at position $k, \ell$ is $K(t_k - t_\ell)$.
+\end{definition}
+We then define our \emph{constraint matrix} rather baroquely to be
+\begin{align}
+  \bD_{\textsf{ker}}
+  &:= \left[
+        \begin{array}{cc}
+          \bD(K, T) & \bD(K^\prime, T)
+        \end{array}\right], \\
+  \bD^{(1)} &:= \bm I_{2s} \otimes \bD_{\textsf{ker}}, \\
+  \bD_{\textsf{ker}}^\prime
+  &:= \left[
+        \begin{array}{cc}
+          \bD(K^\prime, T) & \bD(K^{\prime\prime}, T)
+        \end{array}\right], \\
+  \bD^{\prime}_{\textsf{coeff}} &:= \left[
+              \begin{array}{ccccccccc}
+                v_{\bullet, 1}^R & v_{\bullet, 1}^R & v_{\bullet, 1}^I & v_{\bullet, 1}^I & \cdots & v_{\bullet, m}^R & v_{\bullet, m}^R & v_{\bullet, m}^I & v_{\bullet, m}^I
+              \end{array} \right] \one^\top , \\
+  \bD^{(2)} &:= D^\prime_{\textsf{coeff}} \odot (D^\prime_{\textsf{ker}} \otimes \one), \\
+  \bD &:= \left[\begin{array}{c} \bD^{(1)} \\ \bD^{(2)} \end{array}\right].
+\end{align}
+If we now define the coefficient vector
+\begin{equation}
+    \bc := \left[\begin{array}{ccccccccc} \alpha_{\bullet, 1}^R & \beta_{\bullet, 1}^R & \alpha_{\bullet, 1}^I & \beta_{\bullet, 1}^I & \cdots & \alpha_{\bullet, m}^R & \beta_{\bullet, m}^R & \alpha_{\bullet, m}^I & \beta_{\bullet, m}^I \end{array} \right]^\top,
+\end{equation}
+then I1 and I2 are encoded in the linear system
+\begin{equation}
+    \bD\bc = \left[\begin{array}{c} v_{\bullet, 1}^R \\ v_{\bullet, 1}^I \\ \vdots \\ v_{\bullet, m}^R \\ v_{\bullet, m}^I \\ \bm 0 \end{array}\right].
+\end{equation}
+[TODO: reordering things can maybe clean this up?]
 
-\subsection{Proving Off-Support Bound}
+\subsection{Step 3: Choosing Solution of Underconstrained System}
 
-\section{Random Sign Patterns}
 
 
 \bibliographystyle{unsrt}
