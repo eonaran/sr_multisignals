@@ -280,12 +280,14 @@
 \newcommand{\sfP}{\mathsf{P}}
 \newcommand{\argmin}{\mathrm{argmin}}
 \newcommand{\argmax}{\mathrm{argmax}}
-\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\diag}{\mathsf{diag}}
 \newcommand{\vrad}{\mathrm{vrad}}
 \newcommand{\rk}{\mathrm{rk}}
 \newcommand{\rkeff}{\mathrm{rk}_{\mathrm{eff}}}
 \newcommand{\GOE}{\mathsf{GOE}}
 \newcommand{\ssG}{\mathsf{G}}
+\newcommand{\balpha}{\bm \alpha}
+\newcommand{\bbeta}{\bm \beta}
 \newcommand{\bA}{\bm A}
 \newcommand{\bB}{\bm B}
 \newcommand{\bD}{\bm D}
@@ -295,6 +297,7 @@
 \newcommand{\bP}{\bm P}
 \newcommand{\bQ}{\bm Q}
 \newcommand{\bR}{\bm R}
+\newcommand{\bV}{\bm V}
 \newcommand{\bW}{\bm W}
 \newcommand{\bX}{\bm X}
 \newcommand{\bY}{\bm Y}
@@ -333,38 +336,50 @@
 \subsection{Single Observation Problem Statement}
 
 Suppose we observe a true signal whose representation in the physical domain is
-\[ x^*(t) = \sum_{j = 1}^s a_j \delta_{t_j}(t), \]
+\begin{equation}
+    x^*(t) = \sum_{j = 1}^s a_j \delta_{t_j}(t),
+\end{equation}
 for $t \in \TT$ where $\TT = \RR / \ZZ$, which we will usually think of as the unit interval $[0, 1]$ with its endpoints identified, and $T = \{t_j\}_{j = 1}^s \subset \TT$ a discrete support set.
 In the Fourier domain, this signal takes the form
-\[ \widehat{x^*}(k) = \sum_{j = 1}^s a_j \exp(-2\pi i k t_j) \]
+\begin{equation}
+    \widehat{x^*}(k) = \sum_{j = 1}^s a_j \exp(-2\pi i k t_j)
+\end{equation}
 for $k \in \ZZ$.
 
-Now, we are interested in recovering this true signal $x$ from an observation that has been corrupted due to poor resolution, which we treat as convolution of $x(t)$ with a point-spread function $\phi(t)$.
+Now, we are interested in recovering this true signal $x$ from an observation that suffers from low resolution, which we represent as convolution of $x(t)$ with a point-spread function (PSF) denoted by $\phi(t)$.
 We then observe the signal
-\[ (\phi * x^*)(t) = \sum_{j = 1}^sa_j \phi(t - t_j). \]
+\begin{equation}
+    (\phi * x^*)(t) = \sum_{j = 1}^sa_j \phi(t - t_j).
+\end{equation}
 In the simplest case, $\phi$ is a Dirichlet kernel with cutoff frequency $f_c$, in which case the Fourier transform of the above is simply the truncation of the Fourier transform of $x^*$.
-Calling the Fourier transform of the observed signal $y$, we have
-\[ y(k) = \left(\sum_{j = 1}^s a_j \exp(-2\pi i k t_j)\right)\One\{|k| \leq f_c \}. \]
+Denoting by $y$ the signal we observe in the Fourier domain, we have
+\begin{equation}
+    y(k) = \left(\sum_{j = 1}^s a_j \exp(-2\pi i k t_j)\right)\One\{|k| \leq f_c \}.
+\end{equation}
 We may then think of the data we observe as simply the $2f_c + 1$ values $y(-f_c), \dots, y(f_c)$.
 We write $\sF_n$ for the sensing operator mapping $x^*$ to these $n$ Fourier coefficients.
 A popular technique for solving this problem is \emph{total variation minimization}, which attempts to recover $x^*$ by solving the convex problem
-\[ \argmin_x \|x\|_{\mathsf{TV}} \text{ subject to } \sF_nx = y. \]
+\begin{equation}
+    \argmin_x \|x\|_{\mathsf{TV}} \text{ subject to } \sF_nx = y.
+\end{equation}
 
 \subsection{Extension to Multiple Observations}
 
-We now consider a slight modification of the problem presented in the previous section, where we make \emph{several} observations signals sharing the support $T = \{t_1, \dots, t_s\}$ of $x^*$, but having varying amplitudes $a_j$.
+We now consider a generalization of the problem presented in the previous section, where we make \emph{several} observations signals sharing the support $T = \{t_1, \dots, t_s\}$ of $x^*$, but having varying amplitudes $a_j$.
 To formalize this, our true signal is now
 \begin{equation}
-    x^*_k(t) = \sum_{j = 1}^s a_{j, k} \delta_{t_j} \text{ for } k \in \{1, \dots, m\},
+    x^*_\ell(t) = \sum_{j = 1}^s a_{\ell, j} \delta_{t_j} \text{ for } \ell \in \{1, \dots, m\},
 \end{equation}
-and our observations are $y_{\ell, k} = (\sF_n x^*_k)_{\ell}$ for $\ell \in \{-f_c, \dots, f_c\}$ and $k \in \{1, \dots, m\}$.
-We think of the $a_{j, k}$ as organized into a matrix $\bA \in \CC^{s \times m}$ and the  $y_{\ell, k}$ as organized into a matrix $\bY \in \CC^{n \times m}$.
+and our observations are $y_{\ell, k} = (\sF_n x^*_\ell)_{k}$ for $k \in \{-f_c, \dots, f_c\}$ and $\ell \in \{1, \dots, m\}$.
+We think of the $a_{\ell, j}$ as organized into vectors $\ba_{j} \in \RR^m$ for $j \in \{1, \dots, s\}$, and the  $y_{\ell, k}$ as organized into a matrix $\bY \in \CC^{m \times n}$.
 The \emph{group total variation minimization} is the natural extension of the previous convex problem to this setting, where we solve
 \begin{equation}
-    \argmin_x \|x\|_{\mathsf{gTV}} \text{ subject to } \left[\begin{array}{cccc}\sF_nx_1 & \sF_n x_2 \cdots \sF_n x_m \end{array}\right] = \bY.
+    \argmin_x \|x\|_{\mathsf{gTV}} \text{ subject to } \left[\begin{array}{cccc}\sF_nx_1 & \sF_n x_2 \cdots \sF_n x_m \end{array}\right]^\top = \bY.
 \end{equation}
 
 \subsection{Dual Certificates}
+
+In this section, we lay out the Lagrangian duality theory for TV and gTV norm minimization, the main tool for theoretical analysis of the performance of these algorithms.
 
 \begin{definition}
     Let $\mu^0 \subset \CC$ denote the complex unit circle.
@@ -372,39 +387,39 @@ The \emph{group total variation minimization} is the natural extension of the pr
 \end{definition}
 
 \begin{definition}
-    For a sign pattern $v \in (\mu^0)^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$ given by
+    For a sign pattern $v \in (\mu^0)^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$,
     \begin{equation}
-        q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t}
+        q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t},
     \end{equation}
-    is a \emph{(single-observation) dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$, and $|q(t)| < 1$ for $t \notin T$.
+    is a \emph{single-observation dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$ and $|q(t)| < 1$ for $t \notin T$.
 \end{definition}
 \begin{proposition}[TV Norm Minimization Duality]
-If a dual certificate for the sign pattern $v_j = \frac{a_j}{|a_j|}$ exists, then $x^*$ is the unique solution of TV minimization for the super-resolution problem.
+If a dual certificate for the sign pattern $v_j = a_j / |a_j|$ exists, then $x^*$ is the unique solution of TV minimization for the super-resolution problem.
 \end{proposition}
 Therefore, to prove the effectiveness of TV minimization it suffices to show that a dual certificate exists under some conditions on $T$.
-The main result of \cite{fernandez2016super} is thus equivalent to the following.
+The main result of \cite{fernandez2016super} establishes that this is true under a minimum separation condition.
 \begin{theorem}[Proposition 2.3 of \cite{fernandez2016super}]
-    If $\Delta(T) \geq \frac{1.26}{f_c}$ and $f_c \geq 10^3$, then a dual certificate exists for any sign pattern on $T$.
+    If $\Delta(T) \geq 1.26\lambda_c$ and $f_c \geq 10^3$, then a dual certificate exists for any sign pattern on $T$.
     \label{thm:single-obs-recovery}
 \end{theorem}
 
-The same ideas extend to the multiple observation case in a straightforward fashion.
+As also observed in \cite{fernandez2016super}, the same ideas extend to the multiple observation case in a straightforward fashion.
 \begin{definition}
     Let $\mu^{m - 1} \subset \CC^m$ denote the $m$-dimensional complex unit sphere.
     A \emph{$m$-dimensional sign pattern} on a set is an assignment of points of $\mu^{m - 1}$ to each point of the set.
 \end{definition}
 \begin{definition}
-    For a sign pattern $v \in (\mu^{m - 1})^T$, a low-pass trigonometric polynomial $q: \TT \to \CC^m$ given by $q(t) = (q_1(t), \dots, q_m(t))$ and
+    For a sign pattern $\bv \in (\mu^{m - 1})^T$, a low-pass trigonometric polynomial $q: \TT \to \CC^m$ given by $q(t) = (q_1(t), \dots, q_m(t))$ and
     \begin{equation}
         q_\ell(t) = \sum_{k = -f_c}^{f_c} c_k \exp(2\pi i k t) \text{ for } \ell \in \{1, \dots, m\}
     \end{equation}
-    is an \emph{$m$-observation dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$, and $\|q(t)\|_{\ell^2} < 1$ for $t \notin T$.
+    is an \emph{$m$-observation dual certificate} for $v$ if $q(t_j) = \bv_j$ for $t_j \in T$, and $\|q(t)\|_{\ell^2} < 1$ for $t \notin T$.
 \end{definition}
 \begin{proposition}[gTV Norm Minimization Duality]
-    If a dual certificate for the sign pattern $v_j = a_{j, \bullet} / \|a_{j, \bullet}\|_{\ell^2}$ exists, then $x^*$ is the unique solution of gTV minimization for the super-resolution problem.
+    If a dual certificate for the sign pattern $\bv_j = \ba_{j} / \|\ba_{j}\|_{\ell^2}$ exists, then $x^*$ is the unique solution of gTV minimization for the super-resolution problem.
 \end{proposition}
-However, while numerical experiments in \cite{fernandez2016super} suggest that when the amplitudes $\bA$ are taken randomly then recovery is possible down to a lower critical minimum separation, the same uniform argument cannot apply---indeed, it is always possible that the observations $a_{j, \bullet}$ are all identical, in which case clearly it cannot be possible to recover $x^*$ any more effectively than in the one observation case.
-Thus, to show that gTV norm minimization substantially improves on TV norm minimization, it is necessary to make some probabilistic assumptions about the data generating process.
+However, while numerical experiments in \cite{fernandez2016super} suggest that when the amplitude vectors $\ba_j$ are taken randomly then recovery is possible down to a lower critical minimum separation which accumulates at $\frac{1}{2}\lambda_c$ as $m \to \infty$, the same uniform argument cannot apply---indeed, it is always possible that the signs $\ba_j$ are all identical, in which case clearly it cannot be possible to recover $x^*$ any more effectively than in the one observation case.
+Thus, to show that gTV norm minimization substantially improves on TV norm minimization, it is necessary to make some probabilistic assumptions about the data generating process of the $\ba_j$.
 
 \section{Dual Certificate Construction}
 
@@ -417,8 +432,8 @@ We propose a different dual certificate, which does succeed numerically in certi
 \subsection{Step 1: Relaxing Gradient Condition}
 
 The first observation is that the condition $\nabla q(t_j) = 0$ is overkill for encouraging $q$ to remain in the unit sphere.
-Intuitively, all that is really necessary is that $\nabla q(t_j)$ not have a component pointing out of the sphere, i.e.\ in the direction of $v_j$.
-Thus, a reasonable condition is to require $\nabla q(t_j)$ and $v_j$, viewed as vectors, to be orthogonal.
+Intuitively, all that is really necessary is that $\nabla q(t_j)$ not have a component pointing out of the sphere, i.e.\ in the direction of $\bv_j$.
+Thus, a reasonable condition is to require $\nabla q(t_j)$ and $\bv_j$, viewed as vectors, to be orthogonal.
 However, it is not possible to express this constraint in complex arithmetic, so we must rewrite the dual certificate in terms of its real and complex parts (each of which is still low-pass).
 
 Thus, we write $q_\ell(t) = q_\ell^R(t) + iq_\ell^I(t)$ for real-valued low-pass trigonometric polynomials $q_\ell^R$ and $q_\ell^I$.
@@ -426,57 +441,80 @@ We combine these into a single real-valued $2m$-dimensional trigonometric polyno
 \begin{equation}
     \tilde{q}(t) = (q_1^R(t), q_1^I(t), \dots, q_m^R(t), q_m^I(t)) \in \RR^{2m}.
 \end{equation}
-Likewise writing $v_{j, \ell} = v_{j, \ell}^R + iv_{j, \ell}^I$ and $\tilde{v}_j = (v_{j, 1}^R, v_{j, 1}^I, \dots, v_{j, m}^R, v_{j, m}^I)$, we can express the interpolation conditions that the dual certificate $q$ must satisfy in terms of these new variables in essentially the same way: $\tilde{q}(t_j) = \tilde{v}_j$, and $\|\tilde{q}(t)\|_{\ell^2} < 1$ for all $t \notin T$.
+Likewise writing $v_{j, \ell} = v_{j, \ell}^R + iv_{j, \ell}^I$ and $\tilde{\bv}_j = (v_{j, 1}^R, v_{j, 1}^I, \dots, v_{j, m}^R, v_{j, m}^I)$, we can express the interpolation conditions that the dual certificate $q$ must satisfy in terms of these new variables in essentially the same way: $\tilde{q}(t_j) = \tilde{\bv}_j$ for $j \in \{1, \dots, s\}$, and $\|\tilde{q}(t)\|_{\ell^2} < 1$ for all $t \notin T$.
 We can now formulate the conditions we will require of our interpolant.
 \begin{enumerate}
-\item[I1.] $\tilde{q}(t_j) = \tilde{v}_j$ for $j \in \{1, \dots, m\}$.
-\item[I2.] $\la \nabla \tilde{q}(t_j), \tilde{v}_j \ra = 0$ for $j \in \{1, \dots, m\}$.
+\item[I1.] $\tilde{q}(t_j) = \tilde{\bv}_j$ for $j \in \{1, \dots, s\}$.
+\item[I2.] $\la \nabla \tilde{q}(t_j), \tilde{\bv}_j \ra = 0$ for $j \in \{1, \dots, s\}$.
 \end{enumerate}
 
 \subsection{Step 2: Kernel Interpolation}
 
 We now proceed just as in \cite{fernandez2016super}: fix a real-valued low-pass kernel $K$, and define
 \begin{align}
-  q_\ell^R(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^R K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^R K^\prime(t - t_j), \\
-  q_\ell^I(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^I K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^I K^\prime(t - t_j),
+  q_\ell^R(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^R K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^R K^\prime(t - t_j), \label{eq:interpolant-def-1} \\
+  q_\ell^I(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^I K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^I K^\prime(t - t_j), \label{eq:interpolant-def-2}
 \end{align}
 for coefficients $\alpha_{j, \ell}^R, \alpha_{j, \ell}^I, \beta_{j, \ell}^R, \beta_{j, \ell}^I \in \RR$ to be determined.
-Conditions I1 and I2 from the previous part may now be expressed as a system of linear constraints on these coefficients, which we introduce some notation to write down concisely.
+We think of these as organized into four matrices, $\balpha^R, \balpha^I, \bbeta^R, \bbeta^I \in \RR^{s \times m}$.
+We also organize the real and imaginary parts of the sign patterns $v_{j, \ell}^R$ and $v_{j, \ell}^I$ into matrices $\bV^R, \bV^I \in \RR^{s \times m}$ of the same shape.
+Conditions I1 and I2 from the previous part may now be expressed as a system of linear constraints on these coefficients, which we introduce some notation to write down concisely with some matrix algebra.
 \begin{definition}
-    For a function $K: \TT \to \RR$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bD(K, T) \in \RR^{s \times s}$ to be the matrix whose entry at position $k, \ell$ is $K(t_k - t_\ell)$.
+    For a function $K: \TT \to \RR$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bD(K, T) \in \RR^{s \times s}$ to have entries
+    \begin{equation}
+        (\bD(K, T))_{j, k} = K(t_j - t_k).
+    \end{equation}
 \end{definition}
-We then define our \emph{constraint matrix} rather baroquely to be
+The constraint I1 may then be written as the two linear matrix equations
 \begin{align}
-  \bD_{\textsf{ker}}
-  &:= \left[
-        \begin{array}{cc}
-          \bD(K, T) & \bD(K^\prime, T)
-        \end{array}\right], \\
-  \bD^{(1)} &:= \bm I_{2s} \otimes \bD_{\textsf{ker}}, \\
-  \bD_{\textsf{ker}}^\prime
-  &:= \left[
-        \begin{array}{cc}
-          \bD(K^\prime, T) & \bD(K^{\prime\prime}, T)
-        \end{array}\right], \\
-  \bD^{\prime}_{\textsf{coeff}} &:= \left[
-              \begin{array}{ccccccccc}
-                v_{\bullet, 1}^R & v_{\bullet, 1}^R & v_{\bullet, 1}^I & v_{\bullet, 1}^I & \cdots & v_{\bullet, m}^R & v_{\bullet, m}^R & v_{\bullet, m}^I & v_{\bullet, m}^I
-              \end{array} \right] \one^\top , \\
-  \bD^{(2)} &:= D^\prime_{\textsf{coeff}} \odot (D^\prime_{\textsf{ker}} \otimes \one), \\
-  \bD &:= \left[\begin{array}{c} \bD^{(1)} \\ \bD^{(2)} \end{array}\right].
+  \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R &= \bV^R, \\
+  \bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I &= \bV^I,
 \end{align}
-If we now define the coefficient vector
+and the constraint I2 as the one equation
 \begin{equation}
-    \bc := \left[\begin{array}{ccccccccc} \alpha_{\bullet, 1}^R & \beta_{\bullet, 1}^R & \alpha_{\bullet, 1}^I & \beta_{\bullet, 1}^I & \cdots & \alpha_{\bullet, m}^R & \beta_{\bullet, m}^R & \alpha_{\bullet, m}^I & \beta_{\bullet, m}^I \end{array} \right]^\top,
+    \diag\bigg(\bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top}\bigg) = \bm 0.
 \end{equation}
-then I1 and I2 are encoded in the linear system
-\begin{equation}
-    \bD\bc = \left[\begin{array}{c} v_{\bullet, 1}^R \\ v_{\bullet, 1}^I \\ \vdots \\ v_{\bullet, m}^R \\ v_{\bullet, m}^I \\ \bm 0 \end{array}\right].
-\end{equation}
-[TODO: reordering things can maybe clean this up?]
+For numerical calculations, it is straightforward to unfold these constraints into a vectorized linear system for the coefficients.
 
 \subsection{Step 3: Choosing Solution of Underconstrained System}
 
+Note that the system described in the previous section has $4sm$ variables but only $2sm + s = (2m + 1)s$ constraints.
+When the sign pattern is purely real, this reduces to $2s$ variables and $2s$ constraints, so there is (generically) a unique solution, as in the construction treated in \cite{fernandez2016super}.
+In our more general setting, however, uniqueness typically fails, and so we must build a criterion for choosing a solution.
+
+This extra freedom lets us further encourage $q(t)$ to remain inside the unit sphere.
+In particular, a natural quantity to minimize is the $L^2$ norm of $q(t)$:
+\begin{equation}
+    \|q\|_{L^2(\TT)}^2 = \int_0^1 \|q(t)\|_{\ell^2}^2 dt.
+\end{equation}
+The added benefit of this choice is that it is a quadratic form in terms of the coefficients $\balpha, \bbeta$, and so its minimization subject to linear constraints is well-understood and has a convenient closed form.
+We now develop some notation to write down this quadratic form.
+\begin{definition}
+    For real-valued functions $K_1, K_2 \in L^2(\TT)$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bG(K_1, K_2, T) \in \RR^{s \times s}$ to have entries
+    \begin{equation}
+        (\bG(K_1, K_2, T))_{j, k} = \int_0^1 K_1(t - t_j)K_2(t - t_k)dt.
+    \end{equation}
+  In the special case $K_1 = K_2 =: K$, we simply write $\bG(K, T)$ for the same matrix, and observe that it is the Gram matrix of the shifted functions $f_j(t) = K(t - t_j)$ in the Hilbert space $L^2(\TT)$.
+\end{definition}
+Now, the $L^2$ norm of the polynomial $q(t)$ with real and imaginary parts as defined in \eqref{eq:interpolant-def-1} and \eqref{eq:interpolant-def-2} respectively is given by
+\begin{align}
+  \|q\|_{L^2(\TT)}^2
+  &= \sum_{X \in \{R, I\}}\sum_{\ell = 1}^m \sum_{j = 1}^s \sum_{k = 1}^s \bigg(\alpha_{\ell, j}^X \alpha_{\ell, k}^X \la K(\bullet - t_j), K(\bullet - t_k) \ra
+  + \beta_{\ell, j}^X \beta_{\ell, k}^X \la K^\prime(\bullet - t_j), K^\prime(\bullet - t_k) \ra \nonumber \\
+  &\hspace{2cm}+ \alpha_{\ell, j}^X \beta_{\ell, k}^X \la K^\prime(\bullet - t_j), K(\bullet - t_k) \ra\bigg) \\
+  &= \sum_{X \in \{R, I\}} \bigg(\Tr(\balpha^{X^\top}\bG(K, T)\balpha^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, T)\bbeta^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, K, T)\balpha^X) \nonumber \\
+  &\hspace{2cm}+ \Tr(\balpha^{X^\top}\bG(K, K^\prime, T)\bbeta^X)\bigg) \\
+  &= \Tr\left( \left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]^\top \left(\bm I_2 \otimes \left[
+  \begin{array}{cc}
+    \bG(K, T) & \bG(K, K^\prime, T) \\
+    \bG(K^\prime, K, T) & \bG(K^\prime, T)
+  \end{array}\right]\right)\left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]\right),
+\end{align}
+where in the last expression each block of the inner matrix is a Gram matrix of the $2s$ functions $K(\bullet - t_j)$ and $K^\prime(\bullet - t_j)$ in $L^2(\TT)$.
+
+\subsection{Numerical Evaluation}
+
+\section{Proof}
 
 
 \bibliographystyle{unsrt}
