@@ -547,16 +547,20 @@ The first order optimality condition for $ L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}},
 \left(G(K',T)+G(K',T)^T \right)\bbeta^I + \left(G(K',K,T)^T+G(K,K',T)^T\right)\balpha^I &- D(K',T)^T\blambda^2-D(K'',T)^T\blambda^3\bm V^I = \bm 0
 \end{align}
 Define matrix $ \tilde{G}\in \RR^{2s\times 2s} $ as
-\[\tilde{G} = \bmat{c}{G(K,T)+G(K,T)^T & G(K,K',T) + G(K',K,T)^T \\ G(K,K',T)^T + G(K',K,T) &G(K',T)+G(K',T)^T \\ } \]
+\begin{align}
+	\tilde{G}& = \bmat{c}{G(K,T)+G(K,T)^T & G(K,K',T) + G(K',K,T)^T \\ G(K,K',T)^T + G(K',K,T) &G(K',T)+G(K',T)^T }\\
+	& =  2 \bmat{c}{G(K,T) & G(K,K',T)  \\ G(K,K',T)^T  &G(K',T) }
+\end{align}
 and $ \tilde{D}\in \RR^{2s\times 2s} $ as
 \[\tilde{D} = \bmat{c}{D(K,T) & D(K',T)\\D(K',T) & D(K'',T)  }\]
-Then first order conditions in compact form,
+Note $ \tilde{D} $ is a symmetric matrix if our kernel is even. 
+Then first order conditions in compact form is
 \begin{align}
-	\tilde{G} \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{D}^T \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
+	\tilde{G} \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{D} \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
 \end{align}
 and 
 \begin{align}
-\tilde{G} \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{D}^T \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
+\tilde{G} \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{D} \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
 \end{align}
 \bibliographystyle{unsrt}
 \bibliography{main}
