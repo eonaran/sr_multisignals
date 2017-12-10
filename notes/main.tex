@@ -18,6 +18,8 @@
 \usepackage{mathtools}
 \usepackage{setspace}
 \usepackage{verbatim}
+\usepackage[capitalize]{cleveref}
+\usepackage{autonum}
 
 %
 % Commands
@@ -287,6 +289,7 @@
 \newcommand{\GOE}{\mathsf{GOE}}
 \newcommand{\ssG}{\mathsf{G}}
 \newcommand{\balpha}{\bm \alpha}
+\newcommand{\blambda}{\bm \lambda}
 \newcommand{\bbeta}{\bm \beta}
 \newcommand{\bA}{\bm A}
 \newcommand{\bB}{\bm B}
@@ -308,6 +311,12 @@
 \newcommand{\bv}{\bm v}
 \newcommand{\bw}{\bm w}
 \newcommand{\bx}{\bm x}
+
+\newcommand{\bmat}[2]{
+	\begin{bmatrix*}[#1]
+		#2
+	\end{bmatrix*}
+}
 
 \DeclareRobustCommand{\bmrob}[1]{\bm{#1}}
 \pdfstringdefDisableCommands{%
@@ -467,12 +476,12 @@ Conditions I1 and I2 from the previous part may now be expressed as a system of 
 \end{definition}
 The constraint I1 may then be written as the two linear matrix equations
 \begin{align}
-  \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R &= \bV^R, \\
-  \bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I &= \bV^I,
+  \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R &= \bV^R, \label{1045} \\
+  \bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I &= \bV^I, \label{1046}
 \end{align}
 and the constraint I2 as the one equation
 \begin{equation}
-    \diag\bigg(\bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top}\bigg) = \bm 0.
+    \diag\bigg(\bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top}\bigg) = \bm 0. \label{1047}
 \end{equation}
 For numerical calculations, it is straightforward to unfold these constraints into a vectorized linear system for the coefficients.
 
@@ -508,15 +517,47 @@ Now, the $L^2$ norm of the polynomial $q(t)$ with real and imaginary parts as de
   \begin{array}{cc}
     \bG(K, T) & \bG(K, K^\prime, T) \\
     \bG(K^\prime, K, T) & \bG(K^\prime, T)
-  \end{array}\right]\right)\left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]\right),
+  \end{array}\right]\right)\left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]\right), \label{1044}
 \end{align}
 where in the last expression each block of the inner matrix is a Gram matrix of the $2s$ functions $K(\bullet - t_j)$ and $K^\prime(\bullet - t_j)$ in $L^2(\TT)$.
 
 \subsection{Numerical Evaluation}
 
 \section{Proof}
+We start by writing the Lagrangian of the optimization problem where we minimize \eqref{1044} with constraints I1 and I2 at \eqref{1045}, \eqref{1046} and \eqref{1047}.  
 
+\begin{align}
+&L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) = \sum_{X \in \{R, I\}} \bigg(\Tr(\balpha^{X^\top}\bG(K, T)\balpha^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, T)\bbeta^X) 
+\\&+ \Tr(\bbeta^{X^\top}\bG(K^\prime, K, T)\balpha^X) + \Tr(\balpha^{X^\top}\bG(K, K^\prime, T)\bbeta^X) \bigg)\\
+&-\Tr\left( (\blambda^1)^T\left( \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R - \bV^R \right) \right) \\
+& - \Tr\left( (\blambda^2)^T\left(\bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I - \bV^I\right) \right)\\
+& - \Tr\bigg( (\blambda^3)^T\left( \bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top} \right)\bigg)  \label{1223}
+\end{align}
+where $ \blambda^1,\blambda^2\in\RR^{s\times m} $ and $ \blambda^3\in\RR^{s\times s} $  is a diagonal matrix. 
 
+The first order optimality condition for $ L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) $ reads as
+\begin{align}
+	\nabla_{\balpha^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
+	\left(G(K,T)+G(K,T)^T \right)\balpha^R + \left(G(K,K',T)^T+G(K',K,T)^T\right)\bbeta^R& - D(K,T)^T\blambda^1-D(K',T)^T\blambda^3\bm V^R = \bm 0\\ \\
+\nabla_{\bbeta^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
+\left(G(K',T)+G(K',T)^T \right)\bbeta^R + \left(G(K',K,T)^T+G(K,K',T)^T\right)\balpha^R &- D(K',T)^T\blambda^1-D(K'',T)^T\blambda^3\bm V^R = \bm 0\\\\
+\nabla_{\balpha^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
+\left(G(K,T)+G(K,T)^T \right)\balpha^I + \left(G(K,K',T)^T+G(K',K,T)^T\right)\bbeta^I &- D(K,T)^T\blambda^2-D(K',T)^T\blambda^3\bm V^I = \bm 0\\\\
+\nabla_{\bbeta^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
+\left(G(K',T)+G(K',T)^T \right)\bbeta^I + \left(G(K',K,T)^T+G(K,K',T)^T\right)\balpha^I &- D(K',T)^T\blambda^2-D(K'',T)^T\blambda^3\bm V^I = \bm 0
+\end{align}
+Define matrix $ \tilde{G}\in \RR^{2s\times 2s} $ as
+\[\tilde{G} = \bmat{c}{G(K,T)+G(K,T)^T & G(K,K',T) + G(K',K,T)^T \\ G(K,K',T)^T + G(K',K,T) &G(K',T)+G(K',T)^T \\ } \]
+and $ \tilde{D}\in \RR^{2s\times 2s} $ as
+\[\tilde{D} = \bmat{c}{D(K,T) & D(K',T)\\D(K',T) & D(K'',T)  }\]
+Then first order conditions in compact form,
+\begin{align}
+	\tilde{G} \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{D}^T \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
+\end{align}
+and 
+\begin{align}
+\tilde{G} \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{D}^T \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
+\end{align}
 \bibliographystyle{unsrt}
 \bibliography{main}
 
