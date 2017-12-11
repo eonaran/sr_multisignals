@@ -538,29 +538,29 @@ where $ \blambda^1,\blambda^2\in\RR^{s\times m} $ and $ \blambda^3\in\RR^{s\time
 The first order optimality condition for $ L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) $ reads as
 \begin{align}
 	\nabla_{\balpha^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
-	\left(G(K,T)+G(K,T)^T \right)\balpha^R + \left(G(K,K',T)^T+G(K',K,T)^T\right)\bbeta^R& - D(K,T)^T\blambda^1-D(K',T)^T\blambda^3\bm V^R = \bm 0\\ \\
+	\left(\bm G(K,T)+\bm G(K,T)^T \right)\balpha^R + \left(\bm G(K,K',T)^T+\bm G(K',K,T)^T\right)\bbeta^R& - \bm D(K,T)^T\blambda^1-\bm D(K',T)^T\blambda^3\bm V^R = \bm 0\\ \\
 \nabla_{\bbeta^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
-\left(G(K',T)+G(K',T)^T \right)\bbeta^R + \left(G(K',K,T)^T+G(K,K',T)^T\right)\balpha^R &- D(K',T)^T\blambda^1-D(K'',T)^T\blambda^3\bm V^R = \bm 0\\\\
+\left(\bm G(K',T)+\bm G(K',T)^T \right)\bbeta^R + \left(\bm G(K',K,T)^T+\bm G(K,K',T)^T\right)\balpha^R &- \bm D(K',T)^T\blambda^1-\bm D(K'',T)^T\blambda^3\bm V^R = \bm 0\\\\
 \nabla_{\balpha^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
-\left(G(K,T)+G(K,T)^T \right)\balpha^I + \left(G(K,K',T)^T+G(K',K,T)^T\right)\bbeta^I &- D(K,T)^T\blambda^2-D(K',T)^T\blambda^3\bm V^I = \bm 0\\\\
+\left(\bm G(K,T)+\bm G(K,T)^T \right)\balpha^I + \left(\bm G(K,K',T)^T+\bm G(K',K,T)^T\right)\bbeta^I &- \bm D(K,T)^T\blambda^2-\bm D(K',T)^T\blambda^3\bm V^I = \bm 0\\\\
 \nabla_{\bbeta^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
-\left(G(K',T)+G(K',T)^T \right)\bbeta^I + \left(G(K',K,T)^T+G(K,K',T)^T\right)\balpha^I &- D(K',T)^T\blambda^2-D(K'',T)^T\blambda^3\bm V^I = \bm 0
+\left(\bm G(K',T)+\bm G(K',T)^T \right)\bbeta^I + \left(\bm G(K',K,T)^T+\bm G(K,K',T)^T\right)\balpha^I &- \bm D(K',T)^T\blambda^2-\bm D(K'',T)^T\blambda^3\bm V^I = \bm 0
 \end{align}
-Define matrix $ \tilde{G}\in \RR^{2s\times 2s} $ as
+Define matrix $  \tilde{\bm G}(K,T)\in \RR^{2s\times 2s} $ as
 \begin{align}
-	\tilde{G}& = \bmat{c}{G(K,T)+G(K,T)^T & G(K,K',T) + G(K',K,T)^T \\ G(K,K',T)^T + G(K',K,T) &G(K',T)+G(K',T)^T }\\
-	& =  2 \bmat{c}{G(K,T) & G(K,K',T)  \\ G(K,K',T)^T  &G(K',T) }
+	\tilde{\bm G}(K,T)& = \bmat{c}{\bm G(K,T)+\bm G(K,T)^T & \bm G(K,K',T) + \bm G(K',K,T)^T \\ \bm G(K,K',T)^T + \bm G(K',K,T) &\bm G(K',T)+\bm G(K',T)^T }\\
+	& =  2 \bmat{c}{\bm G(K,T) & \bm G(K,K',T)  \\ \bm G(K,K',T)^T  &\bm G(K',T) }
 \end{align}
-and $ \tilde{D}\in \RR^{2s\times 2s} $ as
-\[\tilde{D} = \bmat{c}{D(K,T) & D(K',T)\\D(K',T) & D(K'',T)  }\]
-Note $ \tilde{D} $ is a symmetric matrix if our kernel is even. 
+and $ \tilde{\bm D}(K,T)\in \RR^{2s\times 2s} $ as
+\[\tilde{\bm D}(K,T) = \bmat{c}{\bm D(K,T) & \bm D(K',T)\\\bm D(K',T) & \bm D(K'',T)  }\]
+Note $ \tilde{\bm D}(K,T) $ is a symmetric matrix if our kernel is even. 
 Then first order conditions in compact form is
 \begin{align}
-	\tilde{G} \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{D} \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
+	\tilde{\bm G}(K,T) \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{\bm D}(K,T) \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
 \end{align}
 and 
 \begin{align}
-\tilde{G} \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{D} \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
+\tilde{\bm G}(K,T) \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{\bm D}(K,T) \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
 \end{align}
 \bibliographystyle{unsrt}
 \bibliography{main}
