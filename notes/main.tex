@@ -333,6 +333,7 @@
 \newtheorem{conjecture}{Conjecture}
 
 \title{Super-Resolution of Point Sources Down to the Rayleigh Limit from Multiple Observations}
+\author{Dmitriy Kunisky, Efe Onaran}
 
 \begin{document}
 
@@ -451,7 +452,7 @@ We combine these into a single real-valued $2m$-dimensional trigonometric polyno
     \tilde{q}(t) = (q_1^R(t), q_1^I(t), \dots, q_m^R(t), q_m^I(t)) \in \RR^{2m}.
 \end{equation}
 Likewise writing $v_{j, \ell} = v_{j, \ell}^R + iv_{j, \ell}^I$ and $\tilde{\bv}_j = (v_{j, 1}^R, v_{j, 1}^I, \dots, v_{j, m}^R, v_{j, m}^I)$, we can express the interpolation conditions that the dual certificate $q$ must satisfy in terms of these new variables in essentially the same way: $\tilde{q}(t_j) = \tilde{\bv}_j$ for $j \in \{1, \dots, s\}$, and $\|\tilde{q}(t)\|_{\ell^2} < 1$ for all $t \notin T$.
-We can now formulate the conditions we will require of our interpolant.
+We can also now formulate the conditions we will require of our interpolant.
 \begin{enumerate}
 \item[I1.] $\tilde{q}(t_j) = \tilde{\bv}_j$ for $j \in \{1, \dots, s\}$.
 \item[I2.] $\la \nabla \tilde{q}(t_j), \tilde{\bv}_j \ra = 0$ for $j \in \{1, \dots, s\}$.
@@ -459,31 +460,22 @@ We can now formulate the conditions we will require of our interpolant.
 
 \subsection{Step 2: Kernel Interpolation}
 
-We now proceed just as in \cite{fernandez2016super}: fix a real-valued low-pass kernel $K$, and define
-\begin{align}
-  q_\ell^R(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^R K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^R K^\prime(t - t_j), \label{eq:interpolant-def-1} \\
-  q_\ell^I(t) &= \sum_{j = 1}^s \alpha_{j, \ell}^I K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell}^I K^\prime(t - t_j), \label{eq:interpolant-def-2}
-\end{align}
-for coefficients $\alpha_{j, \ell}^R, \alpha_{j, \ell}^I, \beta_{j, \ell}^R, \beta_{j, \ell}^I \in \RR$ to be determined.
-We think of these as organized into four matrices, $\balpha^R, \balpha^I, \bbeta^R, \bbeta^I \in \RR^{s \times m}$.
-We also organize the real and imaginary parts of the sign patterns $v_{j, \ell}^R$ and $v_{j, \ell}^I$ into matrices $\bV^R, \bV^I \in \RR^{s \times m}$ of the same shape.
-Conditions I1 and I2 from the previous part may now be expressed as a system of linear constraints on these coefficients, which we introduce some notation to write down concisely with some matrix algebra.
+We now proceed just as in \cite{fernandez2016super}, viewing the problem constructed in the previous section as a purely real-valued one: fix a real-valued low-pass kernel $K$, and define
+\[ \tilde{q}_{\ell}(t) = \sum_{j = 1}^s \alpha_{j, \ell}K(t - t_j) + \sum_{j = 1}^s \beta_{j, \ell} K^\prime(t - t_j) \]
+for $\ell \in [2m]$ and coefficients $\alpha_{j, \ell}, \beta_{j, \ell} \in \RR$ to be determined.
+We think of these as organized into vectors $\balpha, \bbeta \in \RR^{2sm}$ where the entries are written iterating first over $j$, then over $\ell$ (in ``row major'' order).
+To concisely write conditions I1 and I2 from the previous part, we first make a small definition.
 \begin{definition}
-    For a function $K: \TT \to \RR$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bD(K, T) \in \RR^{s \times s}$ to have entries
+    For a function $K: \TT \to \RR$ and an ordered point set $T = \{t_1, \dots, t_s\} \subset \TT$, define $\bD(K, T) \in \RR^{s \times s}$ to have entries
     \begin{equation}
         (\bD(K, T))_{j, k} = K(t_j - t_k).
     \end{equation}
 \end{definition}
-The constraint I1 may then be written as the two linear matrix equations
-\begin{align}
-  \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R &= \bV^R, \label{1045} \\
-  \bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I &= \bV^I, \label{1046}
-\end{align}
-and the constraint I2 as the one equation
-\begin{equation}
-    \diag\bigg(\bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top}\bigg) = \bm 0. \label{1047}
-\end{equation}
-For numerical calculations, it is straightforward to unfold these constraints into a vectorized linear system for the coefficients.
+We also define the vector $\tilde{\bv}$ to be the $\tilde{v}_{j, \ell}$ flattened also in row-major order.
+Conditions I1 and I2 may then be written as the matrix equation
+\[ \left[ \begin{array}{cc} \bm I_{2m} \otimes \bD(K, T) & \bm I_{2m} \otimes \bD(K^\prime, T) \\ (\one_s\bv^\top) \odot (\one_{2m}^\top \otimes \bD(K^\prime, T)) & (\one_s \bv^\top) \odot (\one_{2m}^\top \otimes \bD(K^{\prime\prime}, T)) \end{array}\right]\left[\begin{array}{c}\balpha \\ \bbeta \end{array}\right] = \left[\begin{array}{cc} \bv \\ \bm 0 \end{array}\right]. \]
+We set some notation for the matrix on the left-hand side and the blocks corresponding to the set of equality constraints and gradient constraints:
+\[ \bA = \left[\begin{array}{c} \bA_{0} \\ \bA_{\nabla} \end{array}\right] = \left[ \begin{array}{cc} \bm I_{2m} \otimes \bD(K, T) & \bm I_{2m} \otimes \bD(K^\prime, T) \\ (\one_s\bv^\top) \odot (\one_{2m}^\top \otimes \bD(K^\prime, T)) & (\one_s \bv^\top) \odot (\one_{2m}^\top \otimes \bD(K^{\prime\prime}, T)) \end{array}\right]. \]
 
 \subsection{Step 3: Choosing Solution of Underconstrained System}
 
@@ -496,72 +488,77 @@ In particular, a natural quantity to minimize is the $L^2$ norm of $q(t)$:
 \begin{equation}
     \|q\|_{L^2(\TT)}^2 = \int_0^1 \|q(t)\|_{\ell^2}^2 dt.
 \end{equation}
-The added benefit of this choice is that it is a quadratic form in terms of the coefficients $\balpha, \bbeta$, and so its minimization subject to linear constraints is well-understood and has a convenient closed form.
+The added benefit of this choice is that it is a quadratic form in terms of the coefficients $\balpha, \bbeta$, so its minimization subject to linear constraints has a convenient closed form.
 We now develop some notation to write down this quadratic form.
 \begin{definition}
     For real-valued functions $K_1, K_2 \in L^2(\TT)$ and an ordered point set $T = \{t_1, \dots, t_s\}$, define $\bG(K_1, K_2, T) \in \RR^{s \times s}$ to have entries
     \begin{equation}
         (\bG(K_1, K_2, T))_{j, k} = \int_0^1 K_1(t - t_j)K_2(t - t_k)dt.
     \end{equation}
-  In the special case $K_1 = K_2 =: K$, we simply write $\bG(K, T)$ for the same matrix, and observe that it is the Gram matrix of the shifted functions $f_j(t) = K(t - t_j)$ in the Hilbert space $L^2(\TT)$.
 \end{definition}
 Now, the $L^2$ norm of the polynomial $q(t)$ with real and imaginary parts as defined in \eqref{eq:interpolant-def-1} and \eqref{eq:interpolant-def-2} respectively is given by
 \begin{align}
   \|q\|_{L^2(\TT)}^2
-  &= \sum_{X \in \{R, I\}}\sum_{\ell = 1}^m \sum_{j = 1}^s \sum_{k = 1}^s \bigg(\alpha_{\ell, j}^X \alpha_{\ell, k}^X \la K(\bullet - t_j), K(\bullet - t_k) \ra
-  + \beta_{\ell, j}^X \beta_{\ell, k}^X \la K^\prime(\bullet - t_j), K^\prime(\bullet - t_k) \ra \nonumber \\
-  &\hspace{2cm}+ \alpha_{\ell, j}^X \beta_{\ell, k}^X \la K^\prime(\bullet - t_j), K(\bullet - t_k) \ra\bigg) \\
-  &= \sum_{X \in \{R, I\}} \bigg(\Tr(\balpha^{X^\top}\bG(K, T)\balpha^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, T)\bbeta^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, K, T)\balpha^X) \nonumber \\
-  &\hspace{2cm}+ \Tr(\balpha^{X^\top}\bG(K, K^\prime, T)\bbeta^X)\bigg) \\
-  &= \Tr\left( \left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]^\top \left(\bm I_2 \otimes \left[
-  \begin{array}{cc}
-    \bG(K, T) & \bG(K, K^\prime, T) \\
-    \bG(K^\prime, K, T) & \bG(K^\prime, T)
-  \end{array}\right]\right)\left[\begin{array}{c} \balpha^R \\ \bbeta^R \\ \balpha^I \\ \bbeta^I \end{array}\right]\right), \label{1044}
+  &= \sum_{\ell = 1}^{2m} \sum_{j = 1}^s \sum_{k = 1}^s \bigg(\alpha_{\ell, j} \alpha_{\ell, k} \la K(\bullet - t_j), K(\bullet - t_k) \ra
+    + \beta_{\ell, j} \beta_{\ell, k} \la K^\prime(\bullet - t_j), K^\prime(\bullet - t_k) \ra \nonumber \\
+  &= \left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right]^\top \left[\begin{array}{cc} \bm I_{2m} \otimes \bG(K, K, T) & \bm I_{2m} \otimes \bG(K, K^\prime, T) \\ \bm I_{2m} \otimes \bG(K^\prime, K, T) & \bm I_{2m} \otimes \bG(K^\prime, K^\prime, T) \end{array}\right]\left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right].
 \end{align}
-where in the last expression each block of the inner matrix is a Gram matrix of the $2s$ functions $K(\bullet - t_j)$ and $K^\prime(\bullet - t_j)$ in $L^2(\TT)$.
+The inner matrix may be further simplified if we set a notation for the Gram matrix of the $2s$ functions $K(\bullet - t_j)$ and $K^\prime(\bullet - t_j)$ in $L^2(\TT)$:
+\begin{align}
+  \bG_0 &= \left[\begin{array}{cc} \bG(K, K, T) & \bm \bG(K, K^\prime, T) \\  \bG(K^\prime, K, T) & \bG(K^\prime, K^\prime, T) \end{array}\right] \succeq 0, \\
+  \bG &= \left[\begin{array}{cc} 1 & 1 \\ 1 & 1 \end{array}\right] \otimes \bm I_{2m} \otimes \bG_0 \succeq 0.
+\end{align}
+We may then concisely write down the full quadratic problem by which we will determine the coefficients $\balpha, \bbeta$ as follows:
+\begin{align}
+  \mathsf{minimize} \hs & \hs \left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right]^\top \bG \left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right] \\
+  \mathsf{subject\ to} \hs & \hs \bA \left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right] = \left[\begin{array}{c} \bv \\ \bm 0 \end{array}\right] \label{eq:opt-problem}
+\end{align}
 
-\subsection{Numerical Evaluation}
+\subsection{Explicit Solution}
 
-\section{Proof}
-We start by writing the Lagrangian of the optimization problem where we minimize \eqref{1044} with constraints I1 and I2 at \eqref{1045}, \eqref{1046} and \eqref{1047}.  
+As mentioned previously, \eqref{eq:opt-problem} has a closed-form solution, which may be derived with a straightforward Lagrange multiplier calculation, similar to the usual derivation of linearly constrained least-squares (corresponding to the case $\bG = \bm I$).
+In our setting, the coefficients $\balpha, \bbeta$ are given by
+\[ \left[\begin{array}{c} \balpha \\ \bbeta \\ \bm \lambda \end{array}\right] = \left[ \begin{array}{cc} \bG & \bA^\top \\ \bA & \bm 0 \end{array}\right]^{-1}\left[ \begin{array}{c} \bm 0 \\ \bm v \\ \bm 0 \end{array}\right] \]
+where $\bm \lambda \in \RR^{(2m + 1)s}$ are the Lagrange multipliers introduced in the calculation.
+(The vectors on either side belong to $\RR^{(6m + 1)s}$.)
+Moreover, we may explicitly invert this block matrix, and dispose of the Lagrange multipliers to obtain the simpler formula
+\begin{equation}
+    \left[\begin{array}{c} \balpha \\ \bbeta \end{array}\right] = \bG^{-1}\bA^\top(\bA \bG^{-1} \bA^\top)^{-1} \left[\begin{array}{c} \bv \\ \bm 0 \end{array}\right].
+    \label{eq:opt-closed-form}
+\end{equation}
+Formula \eqref{eq:opt-closed-form} will be the beginning of our subsequent analysis; the remaining task is essentially just to obtain a detailed understanding of the structure of the matrix on the right-hand side.
 
-\begin{align}
-&L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) = \sum_{X \in \{R, I\}} \bigg(\Tr(\balpha^{X^\top}\bG(K, T)\balpha^X) + \Tr(\bbeta^{X^\top}\bG(K^\prime, T)\bbeta^X) 
-\\&+ \Tr(\bbeta^{X^\top}\bG(K^\prime, K, T)\balpha^X) + \Tr(\balpha^{X^\top}\bG(K, K^\prime, T)\bbeta^X) \bigg)\\
-&-\Tr\left( (\blambda^1)^T\left( \bD(K, T)\balpha^R + \bD(K^\prime, T)\bbeta^R - \bV^R \right) \right) \\
-& - \Tr\left( (\blambda^2)^T\left(\bD(K, T)\balpha^I + \bD(K^\prime, T)\bbeta^I - \bV^I\right) \right)\\
-& - \Tr\bigg( (\blambda^3)^T\left( \bD(K^{\prime}, T)\balpha^R\bV^{R^\top} + \bD(K^{\prime\prime}, T)\bbeta^R\bV^{R^\top} + \bD(K^{\prime}, T)\balpha^I\bV^{I^\top} + \bD(K^{\prime\prime}, T)\bbeta^I\bV^{I^\top} \right)\bigg)  \label{1223}
-\end{align}
-where $ \blambda^1,\blambda^2\in\RR^{s\times m} $ and $ \blambda^3\in\RR^{s\times s} $  is a diagonal matrix. 
+\section{Numerical Evaluation}
 
-The first order optimality condition for $ L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) $ reads as
-\begin{align}
-	\nabla_{\balpha^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
-	\left(\bm G(K,T)+\bm G(K,T)^T \right)\balpha^R + \left(\bm G(K,K',T)^T+\bm G(K',K,T)^T\right)\bbeta^R& - \bm D(K,T)^T\blambda^1-\bm D(K',T)^T\blambda^3\bm V^R = \bm 0\\ \\
-\nabla_{\bbeta^R}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
-\left(\bm G(K',T)+\bm G(K',T)^T \right)\bbeta^R + \left(\bm G(K',K,T)^T+\bm G(K,K',T)^T\right)\balpha^R &- \bm D(K',T)^T\blambda^1-\bm D(K'',T)^T\blambda^3\bm V^R = \bm 0\\\\
-\nabla_{\balpha^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow\\
-\left(\bm G(K,T)+\bm G(K,T)^T \right)\balpha^I + \left(\bm G(K,K',T)^T+\bm G(K',K,T)^T\right)\bbeta^I &- \bm D(K,T)^T\blambda^2-\bm D(K',T)^T\blambda^3\bm V^I = \bm 0\\\\
-\nabla_{\bbeta^I}L(\balpha^{\{R,I\}},\bbeta^{\{R,I\}}, \blambda^{\{1,2,3\}}) &= \bm 0 \quad\Leftrightarrow \\
-\left(\bm G(K',T)+\bm G(K',T)^T \right)\bbeta^I + \left(\bm G(K',K,T)^T+\bm G(K,K',T)^T\right)\balpha^I &- \bm D(K',T)^T\blambda^2-\bm D(K'',T)^T\blambda^3\bm V^I = \bm 0
-\end{align}
-Define matrix $  \tilde{\bm G}(K,T)\in \RR^{2s\times 2s} $ as
-\begin{align}
-	\tilde{\bm G}(K,T)& = \bmat{c}{\bm G(K,T)+\bm G(K,T)^T & \bm G(K,K',T) + \bm G(K',K,T)^T \\ \bm G(K,K',T)^T + \bm G(K',K,T) &\bm G(K',T)+\bm G(K',T)^T }\\
-	& =  2 \bmat{c}{\bm G(K,T) & \bm G(K,K',T)  \\ \bm G(K,K',T)^T  &\bm G(K',T) }
-\end{align}
-and $ \tilde{\bm D}(K,T)\in \RR^{2s\times 2s} $ as
-\[\tilde{\bm D}(K,T) = \bmat{c}{\bm D(K,T) & \bm D(K',T)\\\bm D(K',T) & \bm D(K'',T)  }\]
-Note $ \tilde{\bm D}(K,T) $ is a symmetric matrix if our kernel is even. 
-Then first order conditions in compact form is
-\begin{align}
-	\tilde{\bm G}(K,T) \bmat{c}{\balpha^R\\ \bbeta^R} = \tilde{\bm D}(K,T) \bmat{c}{\blambda^1\\ \blambda^3 \bm V^R} 
-\end{align}
-and 
-\begin{align}
-\tilde{\bm G}(K,T) \bmat{c}{\balpha^I\\ \bbeta^I} = \tilde{\bm D}(K,T) \bmat{c}{\blambda^2\\ \blambda^3 \bm V^I} 
-\end{align}
+In this section, we present some numerical results illustrating the performance of this dual certificate construction as the parameter $m$ increases.
+These should be compared to Figures 3 and 9 of \cite{fernandez2016super} to observe that the dual certificate is feasible (and therefore certifies recovery) in basically all cases where the \textsf{gTV} convex program itself successfully achieves recovery.
+First, in Figure~\ref{fig:real-complex}, we compare the case $m = 1$ with the case $m = 2$, which is the difference between real and complex sign patterns, and see that our dual certificate indeed is feasible more often in the latter case.
+
+\begin{figure}[!h]
+    \begin{center}
+        \includegraphics[scale=0.55]{../img/results-m=1.png}
+    \end{center}
+    \vspace{-0.5cm}
+    \caption{\textbf{Real vs. Complex Amplitudes.} We show that our dual certificate construction performs better on i.i.d.\ random complex sign patterns (so that the sign pattern is uniform on the complex unit circle) than on i.i.d.\ real sign patterns (equal to $\pm 1$ with equal probability), showing the fraction of trials (out of 10) that the dual certificate is feasible in each case for fixed number of signals and minimum separation, and the difference between the fractions in the last panel.}
+    \label{fig:real-complex}
+\end{figure}
+
+Second, in Figure~\ref{fig:higher-m}, we consider higher values of $m$, and note that the improvement continues, and the minimum separation at which the dual certificate stops being feasible for large support sets appears to approach the Rayleigh limit of $\frac{1}{2}\lambda_c$ as $m \to \infty$.
+
+\begin{figure}[!h]
+    \begin{center}
+        \includegraphics[scale=0.55]{../img/results-m=4.png}
+        \HS \HS
+        \includegraphics[scale=0.55]{../img/results-m=10.png}
+    \end{center}
+    \vspace{-0.5cm}
+    \caption{\textbf{Increasing Dimension.} We show that the trend of improving feasibility performance as $m \to \infty$ continues for higher values of $m$, with the feasibility phase transition appearing to saturate around a minimum separation of $\frac{1}{2}\lambda_c$.}
+    \label{fig:higher-m}
+\end{figure}
+
+\section{Proof of Dual Feasibility}
+
+\nocite{*}
 \bibliographystyle{unsrt}
 \bibliography{main}
 
