@@ -1,6 +1,6 @@
 """Tools for creating interpolation-based dual certificates."""
 
-from trig_poly import MultiTrigPoly
+from trig_poly import TrigPoly, MultiTrigPoly
 
 import mpmath
 import numpy as np
@@ -247,6 +247,51 @@ def interpolate_multidim_with_derivative(
 #
 # Validation functions
 #
+
+def interpolate_multidim_0Grad(support, sign_pattern, kernel):
+    assert support.shape[0] == sign_pattern.shape[0]
+    assert np.all(
+        np.absolute(
+            np.sum(np.absolute(sign_pattern) ** 2, axis=1) - 1.0) < 1e-10)
+
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    kernel1 = kernel.derivative()
+    kernel2 = kernel1.derivative()
+
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+    kernel_values = kernel(time_deltas)
+    kernel1_values = kernel1(time_deltas)
+    kernel2_values = kernel2(time_deltas)
+    problem_mx = np.bmat([
+        [kernel_values, kernel1_values],
+        [kernel1_values, kernel2_values]])
+
+    coeffss = []
+    for k in range(m):
+        single_sign_pattern = sign_pattern[:, k]
+        problem_obj = np.hstack(
+            [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
+        coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+
+    return MultiTrigPoly([
+        (TrigPoly(
+            kernel.freqs,
+            sum(kernel.coeffs * np.exp(2.0 * np.pi * 1j * kernel.freqs * -t) * c
+                for c, t in zip(coeffs[:n], support))) +
+         TrigPoly(
+             kernel1.freqs,
+             sum(kernel1.coeffs * np.exp(2.0 * np.pi * 1j * kernel1.freqs * -t) * c
+                 for c, t in zip(coeffs[n:], support))))
+        for coeffs in coeffss])
+
+    return MultiTrigPoly([
+        sum([kernel.shift(-t) * c for c, t in zip(coeffs[:n], support)],
+            TrigPoly.zero()) +
+        sum([kernel1.shift(-t) * c for c, t in zip(coeffs[n:], support)],
+            TrigPoly.zero())
+        for coeffs in coeffss])
 
 
 _EPSILON = 1e-7
