@@ -17,7 +17,6 @@ def _interpolator_norm_quadratic_form(kernel, support):
     kernel_1_inners = kernel_1.inners_of_shifts(support)
     cross_inners = kernel.inners_of_shifts_and_derivative_shifts(support)
 
-    # Build objective quadratic form corresponding to interpolator L2 norm:
     S = np.zeros((4*n, 4*n)).astype(np.complex128)
     S[:n, :n] = kernel_inners
     S[n:2*n, n:2*n] = kernel_1_inners
@@ -30,6 +29,78 @@ def _interpolator_norm_quadratic_form(kernel, support):
     # TODO: Make sure it's ok to cast to real here
     S = (S + S.T).real * 0.5
     return S
+
+
+def _interpolator_linear_constraints(kernel, support, sign_pattern):
+    """Build linear constraint data for partial derivative constraint."""
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
+    kernel_1 = kernel.derivative()
+    kernel_2 = kernel_1.derivative()
+
+    kernel_values = kernel(time_deltas)
+    kernel_1_values = kernel_1(time_deltas)
+    kernel_2_values = kernel_2(time_deltas)
+
+    sign_pattern_real = np.real(sign_pattern)
+    sign_pattern_imag = np.imag(sign_pattern)
+
+    zeros = np.zeros((n, n))
+    problem_mx_rows = []
+    problem_obj_cols = []
+    for k in range(m):
+        # Row of real part constraint
+        row1 = []
+        for _ in range(4 * k):
+            row1.append(zeros)
+        row1.append(kernel_values)
+        row1.append(kernel_1_values)
+        row1.append(zeros)
+        row1.append(zeros)
+        for _ in range(4 * (m - 1 - k)):
+            row1.append(zeros)
+        problem_mx_rows.append(row1)
+
+        # Row of imaginary part constraint
+        row2 = []
+        for _ in range(4 * k):
+            row2.append(zeros)
+        row2.append(zeros)
+        row2.append(zeros)
+        row2.append(kernel_values)
+        row2.append(kernel_1_values)
+        for _ in range(4 * (m - 1 - k)):
+            row2.append(zeros)
+        problem_mx_rows.append(row2)
+
+    gradient_row = []
+    for k in range(m):
+        # Row of gradient constraint
+        single_sign_pattern_real = sign_pattern_real[:, k]
+        single_sign_pattern_imag = sign_pattern_imag[:, k]
+        gradient_row.append(
+            single_sign_pattern_real.reshape((n, 1)) * kernel_1_values)
+        gradient_row.append(
+            single_sign_pattern_real.reshape((n, 1)) * kernel_2_values)
+        gradient_row.append(
+            single_sign_pattern_imag.reshape((n, 1)) * kernel_1_values)
+        gradient_row.append(
+            single_sign_pattern_imag.reshape((n, 1)) * kernel_2_values)
+
+        # Objective
+        problem_obj_cols.append(single_sign_pattern_real)
+        problem_obj_cols.append(single_sign_pattern_imag)
+
+    problem_mx_rows.append(gradient_row)
+    problem_mx = np.bmat(problem_mx_rows)
+
+    problem_obj_cols.append(np.zeros(n))
+    problem_obj = np.hstack(problem_obj_cols)
+
+    return problem_mx, problem_obj
 
 
 def _optimize_quadratic_form(S, A, y, multiplier=1.0):
@@ -151,73 +222,8 @@ def interpolate_multidim_with_derivative(
     n = support.shape[0]
     m = sign_pattern.shape[1]
 
-    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
-
-    kernel_1 = kernel.derivative()
-    kernel_2 = kernel_1.derivative()
-
-    kernel_values = kernel(time_deltas)
-    kernel_1_values = kernel_1(time_deltas)
-    kernel_2_values = kernel_2(time_deltas)
-
-    sign_pattern_real = np.real(sign_pattern)
-    sign_pattern_imag = np.imag(sign_pattern)
-
-    #
-    # Build linear constraint data
-    #
-
-    zeros = np.zeros((n, n))
-    problem_mx_rows = []
-    problem_obj_cols = []
-    for k in range(m):
-        # Row of real part constraint
-        row1 = []
-        for _ in range(4 * k):
-            row1.append(zeros)
-        row1.append(kernel_values)
-        row1.append(kernel_1_values)
-        row1.append(zeros)
-        row1.append(zeros)
-        for _ in range(4 * (m - 1 - k)):
-            row1.append(zeros)
-        problem_mx_rows.append(row1)
-
-        # Row of imaginary part constraint
-        row2 = []
-        for _ in range(4 * k):
-            row2.append(zeros)
-        row2.append(zeros)
-        row2.append(zeros)
-        row2.append(kernel_values)
-        row2.append(kernel_1_values)
-        for _ in range(4 * (m - 1 - k)):
-            row2.append(zeros)
-        problem_mx_rows.append(row2)
-
-    gradient_row = []
-    for k in range(m):
-        # Row of gradient constraint
-        single_sign_pattern_real = sign_pattern_real[:, k]
-        single_sign_pattern_imag = sign_pattern_imag[:, k]
-        gradient_row.append(
-            single_sign_pattern_real.reshape((n, 1)) * kernel_1_values)
-        gradient_row.append(
-            single_sign_pattern_real.reshape((n, 1)) * kernel_2_values)
-        gradient_row.append(
-            single_sign_pattern_imag.reshape((n, 1)) * kernel_1_values)
-        gradient_row.append(
-            single_sign_pattern_imag.reshape((n, 1)) * kernel_2_values)
-
-        # Objective
-        problem_obj_cols.append(single_sign_pattern_real)
-        problem_obj_cols.append(single_sign_pattern_imag)
-
-    problem_mx_rows.append(gradient_row)
-    problem_mx = np.bmat(problem_mx_rows)
-
-    problem_obj_cols.append(np.zeros(n))
-    problem_obj = np.hstack(problem_obj_cols)
+    problem_mx, problem_obj = _interpolator_linear_constraints(
+        kernel, support, sign_pattern)
 
     #
     # Build objective quadratic form
@@ -229,7 +235,8 @@ def interpolate_multidim_with_derivative(
     S = np.kron(np.identity(m), S_diag_block)
 
     # This multiplier value is heuristically chosen.
-    multiplier = kernel_1.squared_norm() / kernel.squared_norm() * 1e3
+    multiplier = (
+        kernel.derivative().squared_norm() / kernel.squared_norm() * 1e6)
     coeffs = _optimize_quadratic_form(
         S,
         problem_mx,
@@ -238,9 +245,11 @@ def interpolate_multidim_with_derivative(
 
     return MultiTrigPoly([
         (kernel.sum_shifts(-support, coeffs[4*k*n:(4*k+1)*n]) +
-         kernel_1.sum_shifts(-support, coeffs[(4*k+1)*n:(4*k+2)*n]) +
+         kernel.derivative().sum_shifts(
+             -support, coeffs[(4*k+1)*n:(4*k+2)*n]) +
          kernel.sum_shifts(-support, coeffs[(4*k+2)*n:(4*k+3)*n] * 1j) +
-         kernel_1.sum_shifts(-support, coeffs[(4*k+3)*n:(4*k+4)*n] * 1j))
+         kernel.derivative().sum_shifts(
+             -support, coeffs[(4*k+3)*n:(4*k+4)*n] * 1j))
         for k in range(m)])
 
 
