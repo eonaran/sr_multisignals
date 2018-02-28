@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def plot_trig_poly_magnitude(p, ax=None, points=200, c='blue'):
+def plot_trig_poly_magnitude(p, ax=None, points=1000, c='blue', **kwargs):
     ax = ax or plt.gca()
 
     ts = np.linspace(0.0, 1.0, points)
@@ -14,7 +14,7 @@ def plot_trig_poly_magnitude(p, ax=None, points=200, c='blue'):
     else:
         ys = np.linalg.norm(values, axis=0)
 
-    ax.plot(ts, ys, c=c)
+    ax.plot(ts, ys, c=c, **kwargs)
 
 
 def plot_support_magnitude_lines(support, ax=None, c='green'):

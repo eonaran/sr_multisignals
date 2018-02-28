@@ -146,6 +146,9 @@ class MultiTrigPoly(object):
         assert all(isinstance(p, TrigPoly) for p in polys)
         self.polys = polys
 
+    def derivative(self):
+        return MultiTrigPoly([p.derivative() for p in self.polys])
+
     def eval(self, t):
         return np.stack([p(t) for p in self.polys], axis=0)
 

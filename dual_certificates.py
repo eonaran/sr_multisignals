@@ -7,7 +7,7 @@ import numpy as np
 from scipy import linalg as sp_linalg
 
 
-def _interpolator_norm_quadratic_form(kernel, support):
+def _interpolator_norm_quadratic_form(support, kernel):
     """Quadratic form calculating L2 norm of interpolator from coefficients."""
     n = support.shape[0]
 
@@ -31,8 +31,8 @@ def _interpolator_norm_quadratic_form(kernel, support):
     return S
 
 
-def _interpolator_linear_constraints(kernel, support, sign_pattern):
-    """Build linear constraint data for partial derivative constraint."""
+def _interpolator_linear_constraints(support, sign_pattern, kernel):
+    """Build linear constraint data for tangent plane derivative problem."""
     n = support.shape[0]
     m = sign_pattern.shape[1]
 
@@ -98,6 +98,159 @@ def _interpolator_linear_constraints(kernel, support, sign_pattern):
     problem_mx = np.bmat(problem_mx_rows)
 
     problem_obj_cols.append(np.zeros(n))
+    problem_obj = np.hstack(problem_obj_cols)
+
+    return problem_mx, problem_obj
+
+
+def _interpolator_linear_constraints_kernel_only(
+        support, sign_pattern, kernel):
+    """Build linear constraint data for tangent plane derivative problem."""
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
+    kernel_values = kernel(time_deltas)
+
+    sign_pattern_real = np.real(sign_pattern)
+    sign_pattern_imag = np.imag(sign_pattern)
+
+    zeros = np.zeros((n, n))
+    problem_mx_rows = []
+    problem_obj_cols = []
+    for k in range(m):
+        # Row of real part constraint
+        row1 = []
+        for _ in range(2 * k):
+            row1.append(zeros)
+        row1.append(zeros)
+        row1.append(kernel_values)
+        for _ in range(2 * (m - 1 - k)):
+            row1.append(zeros)
+        problem_mx_rows.append(row1)
+
+        # Row of imaginary part constraint
+        row2 = []
+        for _ in range(2 * k):
+            row2.append(zeros)
+        row2.append(zeros)
+        row2.append(kernel_values)
+        for _ in range(2 * (m - 1 - k)):
+            row2.append(zeros)
+        problem_mx_rows.append(row2)
+
+    for k in range(m):
+        single_sign_pattern_real = sign_pattern_real[:, k]
+        single_sign_pattern_imag = sign_pattern_imag[:, k]
+
+        # Objective
+        problem_obj_cols.append(single_sign_pattern_real)
+        problem_obj_cols.append(single_sign_pattern_imag)
+
+    problem_mx = np.bmat(problem_mx_rows)
+
+    problem_obj_cols.append(np.zeros(n))
+    problem_obj = np.hstack(problem_obj_cols)
+
+    return problem_mx, problem_obj
+
+
+def _interpolator_linear_constraints_with_derivatives(
+        support, sign_pattern, kernel, support_derivatives):
+    """Build linear constraint data for fixed derivative problem.
+
+    kernel (fn)
+    support (np.array(s))
+    sign_pattern (np.array(s, m))
+    support_derivatives (np.array(s, m))
+    """
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
+    kernel_1 = kernel.derivative()
+    kernel_2 = kernel_1.derivative()
+
+    kernel_values = kernel(time_deltas)
+    kernel_1_values = kernel_1(time_deltas)
+    kernel_2_values = kernel_2(time_deltas)
+
+    sign_pattern_real = np.real(sign_pattern)
+    sign_pattern_imag = np.imag(sign_pattern)
+
+    problem_mx = np.bmat([
+        [kernel_values, kernel1_values],
+        [kernel1_values, kernel2_values]])
+
+    coeffss = []
+    for k in range(m):
+        single_sign_pattern = sign_pattern[:, k]
+        problem_obj = np.hstack(
+            [single_sign_pattern, np.zeros(single_sign_pattern.shape[0])])
+        coeffss.append(np.linalg.solve(problem_mx, problem_obj))
+
+    zeros = np.zeros((n, n))
+    problem_mx_rows = []
+    problem_obj_cols = []
+    for k in range(m):
+        # Row of real part constraint
+        row1 = []
+        for _ in range(4 * k):
+            row1.append(zeros)
+        row1.append(kernel_values)
+        row1.append(kernel_1_values)
+        row1.append(zeros)
+        row1.append(zeros)
+        for _ in range(4 * (m - 1 - k)):
+            row1.append(zeros)
+        problem_mx_rows.append(row1)
+        problem_obj_cols.append(sign_pattern_real[:, k])
+
+        # Row of imaginary part constraint
+        row2 = []
+        for _ in range(4 * k):
+            row2.append(zeros)
+        row2.append(zeros)
+        row2.append(zeros)
+        row2.append(kernel_values)
+        row2.append(kernel_1_values)
+        for _ in range(4 * (m - 1 - k)):
+            row2.append(zeros)
+        problem_mx_rows.append(row2)
+        problem_obj_cols.append(sign_pattern_imag[:, k])
+
+    multiplier = 500
+
+    for k in range(m):
+        # Row of derivative real part constraint
+        row1 = []
+        for _ in range(4 * k):
+            row1.append(zeros)
+        row1.append(kernel_1_values / multiplier)
+        row1.append(kernel_2_values / multiplier)
+        row1.append(zeros)
+        row1.append(zeros)
+        for _ in range(4 * (m - 1 - k)):
+            row1.append(zeros)
+        problem_mx_rows.append(row1)
+        problem_obj_cols.append(np.real(support_derivatives[:, k]) / multiplier)
+
+        # Row of derivative imaginary part constraint
+        row2 = []
+        for _ in range(4 * k):
+            row2.append(zeros)
+        row2.append(zeros)
+        row2.append(zeros)
+        row2.append(kernel_1_values / multiplier)
+        row2.append(kernel_2_values / multiplier)
+        for _ in range(4 * (m - 1 - k)):
+            row2.append(zeros)
+        problem_mx_rows.append(row2)
+        problem_obj_cols.append(np.imag(support_derivatives[:, k]) / multiplier)
+
+    problem_mx = np.bmat(problem_mx_rows)
     problem_obj = np.hstack(problem_obj_cols)
 
     return problem_mx, problem_obj
@@ -178,7 +331,7 @@ def interpolate_with_derivative(support, sign_pattern, kernel):
          np.zeros(sign_pattern.shape[0])])
 
     # Build objective quadratic form corresponding to interpolator L2 norm:
-    S = _interpolator_norm_quadratic_form(kernel, support)
+    S = _interpolator_norm_quadratic_form(support, kernel)
 
     coeffs = _optimize_quadratic_form(S, A, y)
 
@@ -189,7 +342,82 @@ def interpolate_with_derivative(support, sign_pattern, kernel):
         kernel_1.sum_shifts(-support, coeffs[3*n:] * 1j))
 
 
-def interpolate_multidim(support, sign_pattern, kernel):
+def interpolate_direct(support, sign_pattern, kernel):
+    """Toy interpolation model multiplying kernel copies by sign pattern."""
+    m = sign_pattern.shape[1]
+    return MultiTrigPoly([
+        sum(
+            (kernel.shift(-t) * sign
+             for t, sign in zip(support, sign_pattern[:, i])),
+            TrigPoly.zero())
+        for i in range(m)
+    ])
+
+
+def interpolate_multidim_fixed_derivatives(
+        support, sign_pattern, kernel, support_derivatives,
+        return_coeffs=False):
+    assert support.shape[0] == sign_pattern.shape[0]
+    assert np.all(
+        np.absolute(
+            np.sum(np.absolute(sign_pattern) ** 2, axis=1) - 1.0) < 1e-10)
+    assert support_derivatives.shape == sign_pattern.shape
+
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    time_deltas = np.outer(support, np.ones(n)) - np.outer(np.ones(n), support)
+
+    kernel_1 = kernel.derivative()
+    kernel_2 = kernel_1.derivative()
+
+    kernel_values = kernel(time_deltas)
+    kernel_1_values = kernel_1(time_deltas)
+    kernel_2_values = kernel_2(time_deltas)
+
+    multiplier = 100.0
+    problem_mx = np.bmat([
+        [kernel_values, kernel_1_values / multiplier],
+        [kernel_1_values / multiplier, kernel_2_values / multiplier / multiplier]]).real
+
+    coeffss = []
+    for k in range(m):
+        problem_obj = np.hstack(
+            [sign_pattern[:, k], support_derivatives[:, k] / multiplier])
+        coeffss.append(np.linalg.lstsq(problem_mx, problem_obj)[0])
+
+    return MultiTrigPoly([
+        kernel.sum_shifts(-support, coeffs[:n]) +
+        kernel_1.sum_shifts(-support, coeffs[n:] / multiplier)
+        for coeffs in coeffss])
+
+    problem_mx, problem_obj = (
+        _interpolator_linear_constraints_with_derivatives(
+            support, sign_pattern, kernel, support_derivatives))
+
+    coeffs = np.linalg.solve(problem_mx, problem_obj)
+
+    kernel_coeffs = [
+        coeffs[4*k*n:(4*k+1)*n] + coeffs[(4*k+2)*n:(4*k+3)*n] * 1j
+        for k in range(m)]
+    kernel_derivative_coeffs = [
+        coeffs[(4*k+1)*n:(4*k+2)*n] + coeffs[(4*k+3)*n:(4*k+4)*n] * 1j
+        for k in range(m)]
+
+    if return_coeffs:
+        return kernel_coeffs, kernel_derivative_coeffs
+    else:
+        return MultiTrigPoly([
+            kernel.sum_shifts(-support, kernel_coeffs[k]) +
+            kernel.derivative().sum_shifts(
+                -support, kernel_derivative_coeffs[k])
+            for k in range(m)])
+
+
+def interpolate_multidim_only_kernel(support, sign_pattern, kernel):
+    """Interpolate only using kernels, no kernel derivatives or derivative
+    constraints.
+    """
     assert support.shape[0] == sign_pattern.shape[0]
     assert np.all(
         np.absolute(
@@ -212,8 +440,12 @@ def interpolate_multidim(support, sign_pattern, kernel):
         for coeffs in coeffss])
 
 
-def interpolate_multidim_with_derivative(
-        support, sign_pattern, kernel):
+def interpolate_multidim_l2_min(
+        support, sign_pattern, kernel, return_coeffs=False):
+    """Interpolation fixing derivatives at interpolated points in tangent
+    plane of sphere, and minimizing L2 norm of the polynomial subject to this
+    constraint.
+    """
     assert support.shape[0] == sign_pattern.shape[0]
     assert np.all(
         np.absolute(
@@ -223,7 +455,7 @@ def interpolate_multidim_with_derivative(
     m = sign_pattern.shape[1]
 
     problem_mx, problem_obj = _interpolator_linear_constraints(
-        kernel, support, sign_pattern)
+        support, sign_pattern, kernel)
 
     #
     # Build objective quadratic form
@@ -231,7 +463,7 @@ def interpolate_multidim_with_derivative(
 
     # S is block-diagonal, with k blocks of size 4n x 4n each of which is the
     # same as the objective quadratic form from the one-sample case.
-    S_diag_block = _interpolator_norm_quadratic_form(kernel, support)
+    S_diag_block = _interpolator_norm_quadratic_form(support, kernel)
     S = np.kron(np.identity(m), S_diag_block)
 
     # This multiplier value is heuristically chosen.
@@ -243,16 +475,80 @@ def interpolate_multidim_with_derivative(
         problem_obj,
         multiplier=multiplier)
 
-    return MultiTrigPoly([
-        (kernel.sum_shifts(-support, coeffs[4*k*n:(4*k+1)*n]) +
-         kernel.derivative().sum_shifts(
-             -support, coeffs[(4*k+1)*n:(4*k+2)*n]) +
-         kernel.sum_shifts(-support, coeffs[(4*k+2)*n:(4*k+3)*n] * 1j) +
-         kernel.derivative().sum_shifts(
-             -support, coeffs[(4*k+3)*n:(4*k+4)*n] * 1j))
-        for k in range(m)])
+    kernel_coeffs = [
+        coeffs[4*k*n:(4*k+1)*n] + coeffs[(4*k+2)*n:(4*k+3)*n] * 1j
+        for k in range(m)]
+    kernel_derivative_coeffs = [
+        coeffs[(4*k+1)*n:(4*k+2)*n] + coeffs[(4*k+3)*n:(4*k+4)*n] * 1j
+        for k in range(m)]
 
-#Fix the derivative to the difference of next and previous samples projected on the tangent plane 
+    if return_coeffs:
+        return kernel_coeffs, kernel_derivative_coeffs
+    else:
+        return MultiTrigPoly([
+            kernel.sum_shifts(-support, kernel_coeffs[k]) +
+            kernel.derivative().sum_shifts(
+                -support, kernel_derivative_coeffs[k])
+            for k in range(m)])
+
+
+def interpolate_multidim_only_kernel_l2_min(
+        support, sign_pattern, kernel, return_coeffs=False):
+    """Interpolation fixing derivatives at interpolated points in tangent
+    plane of sphere, and minimizing L2 norm of the polynomial subject to this
+    constraint.
+    """
+    assert support.shape[0] == sign_pattern.shape[0]
+    assert np.all(
+        np.absolute(
+            np.sum(np.absolute(sign_pattern) ** 2, axis=1) - 1.0) < 1e-10)
+
+    n = support.shape[0]
+    m = sign_pattern.shape[1]
+
+    problem_mx, problem_obj = _interpolator_linear_constraints_kernel_only(
+        support, sign_pattern, kernel)
+
+    print problem_mx.shape
+
+    #
+    # Build objective quadratic form
+    #
+
+    # S is block-diagonal, with k blocks of size 4n x 4n each of which is the
+    # same as the objective quadratic form from the one-sample case.
+    S_diag_block = kernel.inners_of_shifts(support)
+    S = np.kron(np.identity(2 * m), S_diag_block)
+
+    # This multiplier value is heuristically chosen.
+    multiplier = (
+        kernel.derivative().squared_norm() / kernel.squared_norm() * 1e6)
+    coeffs = _optimize_quadratic_form(
+        S,
+        problem_mx,
+        problem_obj,
+        multiplier=multiplier)
+
+    print coeffs
+
+    kernel_coeffs = [
+        coeffs[2*k*n:2*(k+1)*n] + coeffs[(k+2)*n:(2*k+3)*n] * 1j
+        for k in range(m)]
+    kernel_derivative_coeffs = [
+        coeffs[(4*k+1)*n:(4*k+2)*n] + coeffs[(4*k+3)*n:(4*k+4)*n] * 1j
+        for k in range(m)]
+
+    if return_coeffs:
+        return kernel_coeffs, kernel_derivative_coeffs
+    else:
+        return MultiTrigPoly([
+            kernel.sum_shifts(-support, kernel_coeffs[k]) +
+            kernel.derivative().sum_shifts(
+                -support, kernel_derivative_coeffs[k])
+            for k in range(m)])
+
+
+#Fix the derivative to the difference of next and previous samples projected on the tangent plane
 def interpolate_multidim_adjacent_samples(
         support, sign_pattern, kernel):
     assert support.shape[0] == sign_pattern.shape[0]
@@ -282,15 +578,21 @@ def interpolate_multidim_adjacent_samples(
     zeros = np.zeros((n, n))
     problem_mx_rows = []
     problem_obj_cols = []
-    
+
+    rand_scale = 1.0 / np.sqrt(n)
+
     vj_p1_real = np.append(np.asarray([sign_pattern_real[i + 1,:] for i in range(n-1)]), np.zeros((1,m))).reshape((n,m))
-    vj_m1_real = np.append(np.zeros((1,m)), np.asarray([sign_pattern_real[i ,:] for i in range(n-1)])).reshape((n,m))   
+    vj_m1_real = np.append(np.zeros((1,m)), np.asarray([sign_pattern_real[i ,:] for i in range(n-1)])).reshape((n,m))
+    # vj_p1_real = np.random.normal(loc=0.0, scale=rand_scale, size=(n, m))
+    # vj_m1_real = np.random.normal(loc=0.0, scale=rand_scale, size=(n, m))
     vj_coeffs_real = np.diagonal((vj_p1_real - vj_m1_real).dot(sign_pattern_real.T) )
-    
+
     vj_p1_imag = np.append(np.asarray([sign_pattern_imag[i + 1,:] for i in range(n-1)]), np.zeros((1,m))).reshape((n,m))
-    vj_m1_imag = np.append(np.zeros((1,m)), np.asarray([sign_pattern_imag[i ,:] for i in range(n-1)])).reshape((n,m))    
+    vj_m1_imag = np.append(np.zeros((1,m)), np.asarray([sign_pattern_imag[i ,:] for i in range(n-1)])).reshape((n,m))
+    # vj_p1_imag = np.random.normal(loc=0.0, scale=rand_scale, size=(n, m))
+    # vj_m1_imag = np.random.normal(loc=0.0, scale=rand_scale, size=(n, m))
     vj_coeffs_imag = np.diagonal((vj_p1_imag - vj_m1_imag).dot(sign_pattern_imag.T) )
-    
+
     for k in range(m):
         # Row of real part constraint
         row1 = []
@@ -315,12 +617,12 @@ def interpolate_multidim_adjacent_samples(
         for _ in range(4 * (m - 1 - k)):
             row2.append(zeros)
         problem_mx_rows.append(row2)
-        
+
         # Objective
         problem_obj_cols.append(sign_pattern_real[:, k])
         problem_obj_cols.append(sign_pattern_imag[:, k])
-        
-    for k in range(m):     
+
+    for k in range(m):
         row1 = []
         for _ in range(4 * k):
             row1.append(zeros)
@@ -343,11 +645,15 @@ def interpolate_multidim_adjacent_samples(
         for _ in range(4 * (m - 1 - k)):
             row2.append(zeros)
         problem_mx_rows.append(row2)
-        
+
         # Objective
-        problem_obj_cols.append(vj_p1_real[:, k] - vj_m1_real[:, k] - np.multiply(vj_coeffs_real,sign_pattern_real[:, k]) )
-        problem_obj_cols.append(vj_p1_imag[:, k] - vj_m1_imag[:, k] - np.multiply(vj_coeffs_imag,sign_pattern_imag[:, k]) )
-        
+        problem_obj_cols.append(
+            (vj_p1_real[:, k] - vj_m1_real[:, k] -
+             np.multiply(vj_coeffs_real, sign_pattern_real[:, k])) / 1000.0)
+        problem_obj_cols.append(
+            (vj_p1_imag[:, k] - vj_m1_imag[:, k] -
+             np.multiply(vj_coeffs_imag, sign_pattern_imag[:, k])) / 1000.0)
+
 
     problem_mx = np.bmat(problem_mx_rows)
     problem_obj = np.hstack(problem_obj_cols)
@@ -356,7 +662,7 @@ def interpolate_multidim_adjacent_samples(
     # Solve
     #
     coeffs = np.linalg.solve(problem_mx, problem_obj)
-    
+
     #Or L2 min
 #     S_diag_block = _interpolator_norm_quadratic_form(kernel, support)
 #     S = np.kron(np.identity(m), S_diag_block)
@@ -368,8 +674,8 @@ def interpolate_multidim_adjacent_samples(
 #         problem_mx,
 #         problem_obj,
 #         multiplier=multiplier)
-    
-    
+
+
     return MultiTrigPoly([
         (kernel.sum_shifts(-support, coeffs[4*k*n:(4*k+1)*n]) +
          kernel_1.sum_shifts(-support, coeffs[(4*k+1)*n:(4*k+2)*n]) +
