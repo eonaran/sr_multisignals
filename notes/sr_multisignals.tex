@@ -1,0 +1,571 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{enumitem}
+\usepackage{amscd}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{bbold}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{easybmat}
+\usepackage{etex}
+\usepackage{framed}
+\usepackage[dvips,letterpaper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[noabbrev,capitalize]{cleveref}
+\usepackage{mathtools}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{verbatim}
+\usepackage[capitalize]{cleveref}
+\usepackage{autonum}
+
+%
+% Commands
+%
+
+% Figures
+\newcommand{\fig}[1]{(figure \ref{#1})}
+\newcommand{\FIG}[1]{figure \ref{#1}}
+
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+
+% Names
+\newcommand{\Mobius}{M\"{o}bius}
+\newcommand{\Holder}{H\"{o}lder}
+\newcommand{\Rouche}{Rouch\'{e}}
+\newcommand{\Ito}{It\={o}}
+\newcommand{\Kondo}{Kond\^{o}}
+\newcommand{\Levy}{L\'{e}vy}
+\newcommand{\Cramer}{Cram\'{e}r}
+\newcommand{\Godel}{G\"{o}del}
+\newcommand{\Carath}{Carath\'{e}odory}
+\newcommand{\Caratheodory}{Carath\'{e}odory}
+\newcommand{\Hopital}{H\^{o}pital}
+
+% Random
+\renewcommand{\bar}{\overline}
+\newcommand{\lvec}{\overrightarrow}
+\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
+
+% Disjoint union
+\makeatletter
+\def\moverlay{\mathpalette\mov@rlay}
+\def\mov@rlay#1#2{\leavevmode\vtop{%
+   \baselineskip\z@skip \lineskiplimit-\maxdimen
+   \ialign{\hfil$\m@th#1##$\hfil\cr#2\crcr}}}
+\newcommand{\charfusion}[3][\mathord]{
+    #1{\ifx#1\mathop\vphantom{#2}\fi
+        \mathpalette\mov@rlay{#2\cr#3}
+      }
+    \ifx#1\mathop\expandafter\displaylimits\fi}
+\makeatother
+
+\newcommand{\cupdot}{\charfusion[\mathbin]{\cup}{\cdot}}
+\newcommand{\bigcupdot}{\charfusion[\mathop]{\bigcup}{\cdot}}
+
+% Blackboard bold
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\HH}{\mathbb{H}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\renewcommand{\AA}{\mathbb{A}}
+\newcommand{\FF}{\mathbb{F}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\Fp}{\FF_p}
+\newcommand{\TrivGp}{\mathbbold{1}}
+\newcommand{\One}{\mathbbold{1}}
+
+\newcommand{\RP}{\RR\mathrm{P}}
+\newcommand{\CP}{\CC\mathrm{P}}
+
+% Vector bold
+\newcommand{\nn}{\bm{n}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\ww}{\bm{w}}
+\newcommand{\xx}{\bm{x}}
+\newcommand{\yy}{\bm{y}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\one}{\bm{1}}
+
+% Other fonts
+\newcommand{\fp}{\mathfrak{p}}
+\newcommand{\fq}{\mathfrak{q}}
+\newcommand{\fg}{\mathfrak{g}}
+\newcommand{\fh}{\mathfrak{h}}
+\newcommand{\fa}{\mathfrak{a}}
+\newcommand{\fb}{\mathfrak{b}}
+\newcommand{\fc}{\mathfrak{c}}
+\newcommand{\fm}{\mathfrak{m}}
+\renewcommand{\sl}{\mathfrak{sl}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\gl}{\mathfrak{gl}}
+\renewcommand{\sp}{\mathfrak{sp}}
+\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sB}{\mathcal{B}}
+\newcommand{\sC}{\mathcal{C}}
+\newcommand{\sD}{\mathcal{D}}
+\newcommand{\sE}{\mathcal{E}}
+\newcommand{\sF}{\mathcal{F}}
+\newcommand{\sG}{\mathcal{G}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sI}{\mathcal{I}}
+\newcommand{\sL}{\mathcal{L}}
+\newcommand{\sM}{\mathcal{M}}
+\newcommand{\sN}{\mathcal{N}}
+\newcommand{\sO}{\mathcal{O}}
+\newcommand{\sP}{\mathcal{P}}
+\newcommand{\sR}{\mathcal{R}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sU}{\mathcal{U}}
+\newcommand{\sV}{\mathcal{V}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
+
+% Spacing
+\newcommand\ThmBr{%
+    \@ifstar{\item[\vbox{\null}]}{%
+      \begingroup % keep changes local
+      \setlength\itemsep{0pt}%
+      \setlength\parsep{0pt}%
+       \item[\vbox{\null}]%
+      \endgroup%
+     }}
+\newcommand{\br}{\vspace{1pc}}
+\newcommand{\BR}{\vspace{2pc}}
+\newcommand{\picspace}{\vspace{13pc}}
+\newcommand{\hs}{\hspace{1mm}}
+\newcommand{\HS}{\hspace{3.5mm}}
+\newcommand{\hr}{
+  \begin{center}
+    \line(1,0){250}
+  \end{center}
+}
+\newcommand{\hrs}{
+  \begin{center}
+    \line(1,0){150}
+  \end{center}
+}
+
+% Plain text
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\newcommand{\disc}{\mathrm{disc}}
+\newcommand{\Ann}{\mathrm{Ann}}
+\newcommand{\Ass}{\mathrm{Ass}}
+\newcommand{\Soc}{\mathrm{Soc}}
+\newcommand{\Supp}{\mathrm{Supp}}
+\newcommand{\Spec}{\mathrm{Spec}}
+\newcommand{\maxSpec}{\mathrm{maxSpec}}
+
+\newcommand{\N}{\mathrm{N}}
+\newcommand{\Tr}{\mathrm{Tr}}
+
+% Functors
+\newcommand{\Hom}{\mathrm{Hom}}
+\newcommand{\Der}{\mathrm{Der}}
+\newcommand{\End}{\mathrm{End}}
+\newcommand{\Ind}{\mathrm{Ind}}
+\newcommand{\Aut}{\mathrm{Aut}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Rad}{\mathrm{Rad}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\Pow}{\mathrm{Pow}}
+\newcommand{\diam}{\mathrm{diam}}
+
+\newcommand{\img}{\mathrm{img}}
+\newcommand{\sgn}{\mathrm{sgn}}
+
+\newcommand{\ch}{\mathrm{char}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\ord}{\mathrm{ord}}
+\newcommand{\cont}{\mathrm{cont}}
+\newcommand{\ab}{\mathrm{ab}}
+\newcommand{\Orb}{\mathrm{Orb}}
+\newcommand{\Syl}{\mathrm{Syl}}
+\newcommand{\Irr}{\mathrm{Irr}}
+\newcommand{\Frac}{\mathrm{Frac}}
+\newcommand{\sep}{\mathrm{sep}}
+\newcommand{\per}{\mathrm{per}}
+
+% Groups
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\PGL}{\mathrm{PGL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
+\newcommand{\oO}{\mathrm{O}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\PSO}{\mathrm{PSO}}
+\newcommand{\Sp}{\mathrm{Sp}}
+\newcommand{\PSp}{\mathrm{PSp}}
+\newcommand{\U}{\mathrm{U}}
+\newcommand{\SU}{\mathrm{SU}}
+\newcommand{\PSU}{\mathrm{PSU}}
+
+% Parentheses
+\newcommand{\lgndr}[2]{\ensuremath{\left(\frac{#1}{#2}\right)}}
+
+% Mappings
+\newcommand{\iso}{\cong}
+\newcommand{\eqdf}{\stackrel{\mathrm{df}}{=}}
+\newcommand{\eqd}{\stackrel{\mathrm{d}}{=}}
+\newcommand{\eqqu}{\stackrel{\mathrm{?}}{=}}
+\newcommand{\xto}{\xrightarrow}
+\newcommand{\dto}{\Rightarrow}
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\xinto}{\xhookrightarrow}
+\newcommand{\onto}{\twoheadrightarrow}
+\newcommand{\xonto}{xtwoheadrightarrow}
+\newcommand{\isoto}{\xto{\sim}}
+\newcommand{\upto}{\nearrow}
+\newcommand{\downto}{\searrow}
+
+% Convenience
+\newcommand{\Implies}{\ensuremath{\Rightarrow}}
+\newcommand{\ImpliedBy}{\ensuremath{\Leftarrow}}
+\newcommand{\Iff}{\ensuremath{\Leftrightarrow}}
+
+\newcommand{\Pfright}{\ensuremath{(\Rightarrow):\hs}}
+\newcommand{\Pfleft}{\ensuremath{(\Leftarrow):\hs}}
+
+\newcommand{\sm}{\ensuremath{\setminus}}
+
+\newcommand{\tab}[1]{(table \ref{#1})}
+\newcommand{\TAB}[1]{table \ref{#1}}
+
+\newcommand{\precode}[1]{\textbf{\footnotesize #1}}
+\newcommand{\code}[1]{\texttt{\footnotesize #1}}
+
+\newcommand{\sectionline}{
+  \nointerlineskip \vspace{\baselineskip}
+  \hspace{\fill}\rule{0.35\linewidth}{.7pt}\hspace{\fill}
+  \par\nointerlineskip \vspace{\baselineskip}
+}
+
+
+%
+% Misc
+%
+
+\parskip0em
+\linespread{1.05}
+\widowpenalty10000
+\clubpenalty10000
+
+
+\newcommand{\HC}{\mathsf{HC}}
+\newcommand{\CHC}{\mathsf{CHC}}
+\newcommand{\SK}{\mathsf{SK}}
+\newcommand{\SDP}{\mathsf{SDP}}
+\newcommand{\SOS}{\mathsf{SOS}}
+\newcommand{\PE}{\mathsf{PE}}
+\newcommand{\PS}{\mathsf{PS}}
+\newcommand{\tEE}{\tilde{\mathbb{E}}}
+\newcommand{\tCov}{\widetilde{\mathrm{Cov}}}
+\newcommand{\sfP}{\mathsf{P}}
+\newcommand{\argmin}{\mathrm{argmin}}
+\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\diag}{\mathsf{diag}}
+\newcommand{\eq}{\mathsf{eq}}
+\newcommand{\der}{\mathsf{der}}
+\newcommand{\vrad}{\mathrm{vrad}}
+\newcommand{\rk}{\mathrm{rk}}
+\newcommand{\rkeff}{\mathrm{rk}_{\mathrm{eff}}}
+\newcommand{\GOE}{\mathsf{GOE}}
+\newcommand{\ssG}{\mathsf{G}}
+\newcommand{\balpha}{\bm \alpha}
+\newcommand{\blambda}{\bm \lambda}
+\newcommand{\bbeta}{\bm \beta}
+\newcommand{\bA}{\bm A}
+\newcommand{\bB}{\bm B}
+\newcommand{\bD}{\bm D}
+\newcommand{\bF}{\bm F}
+\newcommand{\bG}{\bm G}
+\newcommand{\bH}{\bm H}
+\newcommand{\bK}{\bm K}
+\newcommand{\bP}{\bm P}
+\newcommand{\bQ}{\bm Q}
+\newcommand{\bR}{\bm R}
+\newcommand{\bV}{\bm V}
+\newcommand{\bW}{\bm W}
+\newcommand{\bX}{\bm X}
+\newcommand{\bY}{\bm Y}
+\newcommand{\ba}{\bm a}
+\newcommand{\bb}{\bm b}
+\newcommand{\bc}{\bm c}
+\newcommand{\bg}{\bm g}
+\newcommand{\bv}{\bm v}
+\newcommand{\bw}{\bm w}
+\newcommand{\bx}{\bm x}
+
+\newcommand{\bmat}[2]{
+	\begin{bmatrix*}[#1]
+		#2
+	\end{bmatrix*}
+}
+
+\DeclareRobustCommand{\bmrob}[1]{\bm{#1}}
+\pdfstringdefDisableCommands{%
+  \renewcommand{\bmrob}[1]{#1}%
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\title{Super-Resolution of Point Sources Down to the Rayleigh Limit from Multiple Observations}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\section{Formal Setup}
+
+\subsection{Single Observation Problem Statement}
+
+Suppose we observe a true signal whose representation in the physical domain is
+\begin{equation}
+    x^*(t) = \sum_{j = 1}^s a_j \delta_{t_j}(t),
+\end{equation}
+for $t \in \TT$ where $\TT = \RR / \ZZ$, which we will usually think of as the unit interval $[0, 1]$ with its endpoints identified, and $T = \{t_j\}_{j = 1}^s \subset \TT$ a discrete support set.
+In the Fourier domain, this signal takes the form
+\begin{equation}
+    \widehat{x^*}(k) = \sum_{j = 1}^s a_j \exp(-2\pi i k t_j)
+\end{equation}
+for $k \in \ZZ$.
+
+Now, we are interested in recovering this true signal $x$ from an observation that suffers from low resolution, which we represent as convolution of $x(t)$ with a point-spread function (PSF) denoted by $\phi(t)$.
+We then observe the signal
+\begin{equation}
+    (\phi * x^*)(t) = \sum_{j = 1}^sa_j \phi(t - t_j).
+\end{equation}
+In the simplest case, $\phi$ is a Dirichlet kernel with cutoff frequency $f_c$, in which case the Fourier transform of the above is simply the truncation of the Fourier transform of $x^*$.
+Denoting by $y$ the signal we observe in the Fourier domain, we have
+\begin{equation}
+    y(k) = \left(\sum_{j = 1}^s a_j \exp(-2\pi i k t_j)\right)\One\{|k| \leq f_c \}.
+\end{equation}
+We may then think of the data we observe as simply the $2f_c + 1$ values $y(-f_c), \dots, y(f_c)$.
+We write $\sF_n$ for the sensing operator mapping $x^*$ to these $n$ Fourier coefficients.
+A popular technique for solving this problem is \emph{total variation minimization}, which attempts to recover $x^*$ by solving the convex problem
+\begin{align}
+  \text{minimize} &\HS \|x\|_{\mathsf{TV}} \\
+  \text{subject to} &\HS \sF_nx = y.
+\end{align}
+
+\subsection{Extension to Multiple Observations}
+
+We now consider a generalization of the problem presented in the previous section, where we make \emph{several} observations signals sharing the support $T = \{t_1, \dots, t_s\}$ of $x^*$, but having varying amplitudes $a_j$.
+To formalize this, our true signal is now
+\begin{equation}
+    x^*_\ell(t) = \sum_{j = 1}^s a_{\ell, j} \delta_{t_j} \text{ for } \ell \in \{1, \dots, m\},
+\end{equation}
+and our observations are $y_{\ell, k} = (\sF_n x^*_\ell)_{k}$ for $k \in \{-f_c, \dots, f_c\}$ and $\ell \in \{1, \dots, m\}$.
+We think of the $a_{\ell, j}$ as organized into vectors $\ba_{j} \in \RR^m$ for $j \in \{1, \dots, s\}$, and the  $y_{\ell, k}$ as organized into a matrix $\bY \in \CC^{m \times n}$.
+The \emph{group total variation minimization} is the natural extension of the previous convex problem to this setting, where we solve
+\begin{align}
+  \text{minimize} &\HS \|x\|_{\mathsf{gTV}} \\
+  \text{subject to} &\HS \left[\begin{array}{cccc}\sF_nx_1 & \sF_n x_2 \cdots \sF_n x_m \end{array}\right]^\top = \bY.
+\end{align}
+
+\subsection{Dual Certificates}
+
+In this section, we briefly describe the results of applying Lagrangian duality to \textsf{TV} and \textsf{gTV} norm minimization, the main tool for theoretical analysis of the performance of these algorithms.
+
+\begin{definition}
+    Let $\mu^0 \subset \CC$ denote the complex unit circle.
+    A \emph{sign pattern} on a set is an assignment of points of $\mu^0$ to each point of the set.
+\end{definition}
+
+\begin{definition}
+    For a sign pattern $v \in (\mu^0)^T$, a low-pass trigonometric polynomial $q: \TT \to \CC$,
+    \begin{equation}
+        q(t) = \sum_{k = -f_c}^{f_c} c_k e^{2\pi i k t},
+    \end{equation}
+    is a \emph{single-observation dual certificate} for $v$ if $q(t_j) = v_j$ for $t_j \in T$ and $|q(t)| < 1$ for $t \notin T$.
+\end{definition}
+\begin{proposition}[\textsf{TV} Norm Minimization Duality]
+If a dual certificate for the sign pattern $v_j = a_j / |a_j|$ exists, then $x^*$ is the unique solution of \textsf{TV} minimization for the super-resolution problem.
+\end{proposition}
+Therefore, to prove the effectiveness of \textsf{TV} minimization it suffices to show that a dual certificate exists under some conditions on $T$.
+The main result of \cite{fernandez2016super} establishes that this is true under a minimum separation condition.
+\begin{definition}
+    The \emph{minimum separation} of a set $T \subset \TT$ is
+    \[ \Delta(T) = \min_{\substack{s, t \in T \\ s \neq t}} | s - t |, \]
+    where we measure the wrap-around distance as on a circle.
+\end{definition}
+
+\begin{theorem}[Proposition 2.3 of \cite{fernandez2016super}]
+    If $\Delta(T) \geq 1.26\lambda_c$ and $f_c \geq 10^3$, then a dual certificate exists for any sign pattern on $T$.
+    \label{thm:single-obs-recovery}
+\end{theorem}
+
+As also observed in \cite{fernandez2016super}, the same ideas extend to the multiple observation case in a straightforward fashion.
+\begin{definition}
+    Let $\mu^{m - 1} \subset \CC^m$ denote the $m$-dimensional complex unit sphere.
+    A \emph{$m$-dimensional sign pattern} on a set is an assignment of points of $\mu^{m - 1}$ to each point of the set.
+\end{definition}
+\begin{definition}
+    For a sign pattern $\bv \in (\mu^{m - 1})^T$, a low-pass trigonometric polynomial $q: \TT \to \CC^m$ given by $q(t) = (q_1(t), \dots, q_m(t))$ and
+    \begin{equation}
+        q_\ell(t) = \sum_{k = -f_c}^{f_c} c_k \exp(2\pi i k t) \text{ for } \ell \in \{1, \dots, m\}
+    \end{equation}
+    is an \emph{$m$-observation dual certificate} for $v$ if $q(t_j) = \bv_j$ for $t_j \in T$, and $\|q(t)\|_{\ell^2} < 1$ for $t \notin T$.
+\end{definition}
+\begin{proposition}[\textsf{gTV} Norm Minimization Duality]
+    If a dual certificate for the sign pattern $\bv_j = \ba_{j} / \|\ba_{j}\|_{\ell^2}$ exists, then $x^*$ is the unique solution of \textsf{gTV} minimization for the super-resolution problem.
+\end{proposition}
+However, while numerical experiments in \cite{fernandez2016super} suggest that when the amplitude vectors $\ba_j$ are taken randomly then recovery is possible down to a lower critical minimum separation which accumulates at $\frac{1}{2}\lambda_c$ as $m \to \infty$, the same uniform argument cannot apply---indeed, it is always possible that the amplitudes $\ba_j$ are all identical, in which case clearly it cannot be possible to recover $x^*$ any more effectively than in the one observation case.
+Thus, to show that \textsf{gTV} norm minimization substantially improves on \textsf{TV} norm minimization, it is necessary to make some incoherence assumptions about the data generating process of the $\ba_j$.
+One simple such assumption that captures the idea of these points being in ``general position'' is to assume that the signs $\bv_j = \ba_j / \|\ba_j\|_{\ell^2}$ are i.i.d.\ isotropically random unit vectors.
+
+\section{Dual Certificate Construction}
+
+Recall that we are interested in building a low-pass trigonometric polynomial $q: \TT \to \CC^m$ interpolating the points $(t_j, \bv_j)$ while remaining strictly inside the unit sphere in $\CC^m$ elsewhere.
+The general idea of such constructions is usually to choose some \emph{interpolation basis} of polynomials, and build $q$ as a linear combination of them under some constraints.
+We first describe a simple approach to choosing interpolation bases based on constraints and a variational heuristic, that justifies several existing techniques and motivates our own.
+
+\subsection{Equivalence of $L^2$ Norm Minimization and Interpolation}
+
+Minimizing $\|q\|_{L^2([0, 1])}$ under some interpolation constraints is equivalent to interpolating with a restricted basis, the basis arising from the nature of the constraints.
+This general principle can be implemented in specific cases with simple Lagrange multiplier calculations.
+Consider, for instance, the problem
+\begin{align}
+  \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
+  \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
+\end{align}
+Let us write
+\[ q_{\bc}(t) = \sum_{f = -f_c}^{f_c} c_f \exp(2\pi i ft), \]
+and define the matrix $\bF_T \in \CC^{s \times (2f_c + 1)}$ by $(\bF_T)_{jf} = \exp(2\pi i ft_j)$, with $-f_c \leq f \leq f_c$.
+Then, the calculation of the values of $q_{\bc}$ on $T$ is a matrix-vector multiplication,
+\[ \left[\begin{array}{c} q_{\bc}(t_1) \\ \vdots \\ q_{\bc}(t_s) \end{array}\right] = \bF_T \bc, \]
+and $\|q_{\bc}\|_{L^2([0, 1])} = \|\bc\|_{2}$.
+Thus, the above problem is equivalently
+\begin{align}
+  \text{minimize} &\HS \|\bc\|_{2} \\
+  \text{subject to} &\HS \bF_T\bc = \bv
+\end{align}
+We write a Lagrangian $L(\bc, \balpha) = \frac{1}{2}\|\bc\|_2^2 - \la \bm \alpha, \bF_T\bc - \bv \ra$, and upon differentiating and solving the first-order optimality condition obtain $\bc = \bF_T^*\bm \alpha$.
+Generally, we have
+\[ q_{\bF_T^* \bm \alpha}(t) = \sum_{f = -f_c}^{f_c} \left(\sum_{j = 1}^s \exp(-2\pi i ft_j)\alpha_j\right)\exp(2\pi i f t) = \sum_{j = 1}^s \alpha_jK(t - t_j) \]
+where $K$ is the Dirichlet kernel.
+We therefore have found the formal equivalence:
+
+\noindent
+\begin{minipage}{.48\linewidth}
+\begin{align}
+  \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
+  \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
+\end{align}
+\end{minipage}
+\begin{minipage}{.04\linewidth}
+    \[ \leftrightarrow \]
+\end{minipage}
+\begin{minipage}{.48\linewidth}
+\begin{align}
+  \text{find} &\HS q(t) = \textstyle\sum_{j = 1}^s \alpha_jK(t - t_j) \\
+  \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
+\end{align}
+\end{minipage}
+\vspace{1em}
+
+In the same way, one obtains a justification for the popular trick for allowing one to force the derivative of $q$ to be zero at each $t_j$ by adding terms $\beta_jK^\prime(t - t_j)$ to the sum above: an analogous calculation shows
+
+\noindent
+\begin{minipage}{.48\linewidth}
+\begin{align}
+  \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\ \\
+  \text{subject to} &\HS q(t_j) = v_j \HS \forall j \in [s] \\
+                  &\HS q^\prime(t_j) = 0 \HS \forall j \in [s]
+\end{align}
+\end{minipage}
+\begin{minipage}{.04\linewidth}
+    \[ \leftrightarrow \]
+\end{minipage}
+\begin{minipage}{.48\linewidth}
+\begin{align}
+  \text{find} &\HS q(t) = \textstyle\sum_{j = 1}^s \alpha_jK(t - t_j) \hs + \\
+  &\HS\HS\HS\HS \textstyle\sum_{j = 1}^s\beta_jK^\prime(t - t_j) \\
+  \text{subject to} &\HS q(t_j) = v_j \HS \forall j \in [s] \\
+                  &\HS q^\prime(t_j) = 0 \HS \forall j \in [s]
+\end{align}
+\end{minipage}
+\vspace{1em}
+
+\subsection{Relaxing the Derivative Condition}
+
+As mentioned before, in the multidimensional setting, we do not expect setting the derivative to equal zero at each interpolation point will allow us to lower the minimum separation threshold substantially beyond where the analogous one-dimensional dual certificate is feasible.
+Instead, we propose a new construction where this condition is relaxed.
+Rather than setting the derivative at each interpolation point to equal zero, we only constrain it to the tangent plane to the complex unit sphere at that interpolation point.
+[TODO: something about not dividing real from complex for clarity though this helps in numerics].
+Following the ideas in the previous section, we propose as a dual certificate the polynomial solving the following optimization problem:
+\begin{align}
+  \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
+  \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s] \\
+                  &\HS \la q^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
+\end{align}
+Performing the translation to an interpolation problem as before gives the following:
+\begin{align}
+  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \sum_{j = 1}^s \beta_jV_{j, k} K^\prime(t - t_j) \\
+  \text{subject to} &\HS q_k(t_j) = V_{j, k} \HS \forall j \in [s], k \in [m] \\
+                  &\HS \la q^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
+\end{align}
+where we organize the sign pattern vectors $\bv_j$ as the rows of the matrix $\bV \in \CC^{s \times m}$.
+Note that if we instead took the constraint $q^\prime(t_j) = \bm 0$, then the second term would involve terms $\beta_{j, k}K^\prime(t - t_j)$ in coordinate $k$, but here we are only allowed \emph{one} set of coefficients $\beta_j$ to use across all coordinates.
+This, along with the randomness of the $V_{j, k}$, essentially ensures that the second term cannot often be large: a single vector $\bm \beta$ cannot align with many weakly dependent random vectors $\bV_{\bullet, k}$ at once.
+
+\subsection{Explicit Solution of Interpolation Problem}
+
+Next, we derive concise formulae solving for the coefficients $\bm \alpha$, $\bm \beta$ (when this is possible, which will later need some justification).
+Let $\bK_r = (\frac{d^r}{dt^r}K(t_i - t_j))_{i, j = 1}^s$, then we may write
+\begin{align}
+  (q_k(t_j))_{j \in [s], k \in [m]} &= \bK_0 \balpha + \bK_1\diag(\bbeta) \bV \\
+  (q_k^\prime(t_j))_{j \in [s], k \in [m]} &= \bK_1 \balpha + \bK_2\diag(\bbeta) \bV
+\end{align}
+Thus, the interpolation equations may be written
+\begin{align}
+  \bK_0 \balpha + \bK_1\diag(\bbeta) \bV &= \bV \\
+  \diag((\bK_1 \balpha + \bK_2\diag(\bbeta) \bV)\bV^*) &= \bm 0
+\end{align}
+From the first equation we obtain
+\[ \balpha = \bK_0^{-1}(\bm I_s - \bK_1 \diag(\bbeta))\bV, \]
+and substituting this into the second obtain
+\[ \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))}, \]
+where division in the latter is coordinatewise, and these formulae hold provided $\bK_0$ is invertible and $\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))$ is nowhere zero.
+  
+\clearpage
+
+\bibliographystyle{unsrt}
+\bibliography{main}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

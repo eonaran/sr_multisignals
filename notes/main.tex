@@ -461,6 +461,15 @@ One simple such assumption that captures the idea of these points being in ``gen
 \section{Dual Certificate Construction}
 
 Recall that we are interested in building a low-pass trigonometric polynomial $q: \TT \to \CC^m$ interpolating the points $(t_j, v_j)$ while remaining strictly inside the unit sphere in $\CC^m$ elsewhere.
+The general idea of such constructions is usually to choose some \emph{interpolation basis} of polynomials, and build $q$ as a linear combination of them under some constraints.
+We first describe a unified approach to choosing interpolation bases based purely on desirable constraints.
+
+\subsection{Equivalence of $L^2$ Norm Minimization and Interpolation}
+
+Generally speaking, minimizing $\|q\|_{L^2([0, 1])}$ under some constraints is equivalent to interpolating
+
+
+
 The idea of the construction of \cite{fernandez2016super} when $m = 1$ is to build $q$ via kernel interpolation, and adjust it so that $q^\prime(t_j) = 0$ for each $j$, which one would hope might encourage the polynomial to remain in the unit sphere (in particular, this solves a problem with the naive approach of building an interpolant directly, where the polynomial does not remain inside the sphere near interpolated points but rather very slightly escapes).
 
 The naive extension of this to the $m$-dimensional case is to require $q^\prime(t_j) = 0$ for each $t_j$.
