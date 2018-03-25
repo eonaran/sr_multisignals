@@ -21,7 +21,6 @@
 \usepackage{tabularx}
 \usepackage{verbatim}
 \usepackage[capitalize]{cleveref}
-\usepackage{autonum}
 
 %
 % Commands
@@ -302,6 +301,7 @@
 \newcommand{\bG}{\bm G}
 \newcommand{\bH}{\bm H}
 \newcommand{\bK}{\bm K}
+\newcommand{\bM}{\bm M}
 \newcommand{\bP}{\bm P}
 \newcommand{\bQ}{\bm Q}
 \newcommand{\bR}{\bm R}
@@ -312,10 +312,12 @@
 \newcommand{\ba}{\bm a}
 \newcommand{\bb}{\bm b}
 \newcommand{\bc}{\bm c}
+\newcommand{\be}{\bm e}
 \newcommand{\bg}{\bm g}
 \newcommand{\bv}{\bm v}
 \newcommand{\bw}{\bm w}
 \newcommand{\bx}{\bm x}
+\newcommand{\bkappa}{\bm \kappa}
 
 \newcommand{\bmat}[2]{
 	\begin{bmatrix*}[#1]
@@ -556,9 +558,82 @@ Thus, the interpolation equations may be written
 From the first equation we obtain
 \[ \balpha = \bK_0^{-1}(\bm I_s - \bK_1 \diag(\bbeta))\bV, \]
 and substituting this into the second obtain
-\[ \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))}, \]
+\[ \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*\bK_2) - \diag(\bV\bV^*\bK_1\bK_0^{-1}\bK_1)}, \]
 where division in the latter is coordinatewise, and these formulae hold provided $\bK_0$ is invertible and $\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))$ is nowhere zero.
-  
+
+\subsection{Special Case: Orthogonal Signs}
+
+Consider the special case where the $\bv_j$ are orthogonal, and for the sake of simplicity $s = m$, so that they form a complete basis.
+Then, without loss of generality we further consider the case where the $\bv_j$ are rotated to equal the standard basis, so that $\bV = \bm I_s$.
+One may then simplify the equations from before, but it is even easier to note directly that the equations governing each polynomial coordinate $q_k(t)$ become decoupled: we are now interested in the interpolation problem
+\begin{align}
+  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \beta_kK^\prime(t - t_k) \\
+  \text{subject to} &\HS q_k(t_j) = \delta_{j, k} \HS \forall j \in [s], k \in [m] \\
+                  &\HS q_k^\prime(t_k) = 0 \HS \forall k \in [m]
+\end{align}
+From the second constraint we may directly solve
+\[ \beta_k = -\frac{1}{K^{\prime\prime}(0)}\sum_{j = 1}^s \alpha_{j, k}K^\prime(t_k - t_j), \]
+and therefore
+\[ q_k(t) = \sum_{j = 1}^s\alpha_{j, k}\left(K(t - t_j) - \frac{K^\prime(t_k - t_j)K^\prime(t - t_k)}{K^{\prime\prime}(0)}\right). \]
+We define the matrix corresponding to this linear system, $\bm M_k$, by
+\[ (\bM_k)_{ij} = K(t_i - t_j) + \frac{K^\prime(t_k - t_j)K^\prime(t_k - t_i)}{K^{\prime\prime}(0)}, \]
+so that, writing $\balpha_k = \balpha_{\bullet, k}$, we find $\balpha_k = \bm M^{-1}_k \bm e_k$.
+We may further decompose
+\[ \bm M_k = \bK_0 + \bm \Delta_k, \]
+where
+\[ (\bm \Delta_k)_{ij} = \frac{K^\prime(t_k - t_j)K^\prime(t_k - t_i)}{K^{\prime\prime}(0)}. \]
+This matrix is rank one:
+\begin{align}
+  \bm \Delta_k &= \frac{1}{K^{\prime\prime}(0)} \bm \bkappa_{1, k} \bm \bkappa_{1, k}^\top \\
+  (\bkappa_{1, k})_i &= K^\prime(t_k - t_i)
+\end{align}
+Therefore, $\bM_k^{-1}$ may be computed by the Sherman-Morrison formula:
+\[ \bM_k^{-1} = \bK_0^{-1} - \frac{1}{K^{\prime\prime}(0) + \bkappa_{1, k}^{\top} \bK_0^{-1} \bkappa_{1, k}}\bK_0^{-1}\bkappa_{1, k} \bkappa_{1, k}^\top \bK_0^{-1}, \]
+and we obtain the formula
+\[ \balpha_k = \bM_k^{-1} \be_k = \bK_0^{-1}\be_k - \frac{\bkappa_{1, k}^\top \bK_0^{-1}\be_k}{K^{\prime\prime}(0) + \bkappa_{1, k}^\top\bK_0^{-1} \bkappa_{1, k}}\bK_0^{-1}\bkappa_{1, k}, \]
+expressing $\balpha_k$ as a perturbation of of $\bK_0^{-1}\be_k$, which is what we would obtain if we were simply doing Dirichlet kernel interpolation on the sign pattern $\be_k$.
+Indeed, if only the first term were present, we would simply have $\bm \alpha \approx \bK_0^{-1}$.
+
+Furthermore, observe that $\la \bkappa_{1, k}, \be_k \ra = K^\prime(0) = 0$, so the perturbation term is very small when $\bK_0^{-1}$ is close to the identity, which is the case for large minimum separations.
+
+\section{Local Analysis}
+
+\begin{proposition}
+    Let $q: [0, 1] \to \CC^m$ be a smooth function.
+    Write $N(t) = \|q(t)\|^2 = \sum_{k = 1}^m |q_k(t)|^2$.
+    Then,
+    \begin{align}
+      N^\prime(t) &= 2\Re(\la q(t), q^\prime(t) \ra) \\
+      N^{\prime\prime}(t) &= 2\Re(\la q(t), q^{\prime\prime}(t) \ra) + 2\|q^\prime(t)\|^2.
+    \end{align}
+\end{proposition}
+Thus, for the local analysis of $N(t)$ near one of the $t_j$ in the special case of orthogonal signs, we have
+\begin{align}
+  N(t_k) &= 1 \\
+  N^\prime(t_k) &= 0 \\
+  N^{\prime\prime}(t_k) &= 2\Re(q^{\prime\prime}_k(t_k)) + 2\sum_{j \neq k}|q_j^\prime(t_k)|^2
+\end{align}
+Thus, the local concavity of $N(t)$ near $t_k$ is a battle between, on the one hand, the concavity of $q_k$ near $t_k$, and on the other hand the total magnitude of the derivatives in all other dimensions.
+Since $K^{\prime\prime\prime}(0) = 0$, we may express
+\[ q^{\prime\prime}_k(t_k) = \sum_{j = 1}^s \alpha_{jk}K^{\prime\prime}(t_k - t_j) = \la \balpha_k, \bkappa_{2, k} \ra, \]
+where we substitute in the leading behavior derived in the previous section.
+
+For the derivative terms, we have
+\begin{align}
+  q^\prime_j(t_k)
+  &= \sum_{i = 1}^s\alpha_{ij}\left(K^\prime(t_k - t_i) - \frac{K^\prime(t_j - t_i)K^{\prime\prime}(t_k - t_j)}{K^{\prime\prime}(0)}\right) \\
+  &= \la \balpha_j, \bkappa_{1, k} \ra - \frac{K^{\prime\prime}(t_k - t_j)}{K^{\prime\prime}(0)} \la \balpha_j, \bkappa_{1, j} \ra
+\end{align}
+The last inner product here may be written fairly simply,
+\[ \la \balpha_j, \bkappa_{1, j} \ra = \bkappa_{1, j}^\top \bK_0^{-1} \be_j\left(1 - \frac{1}{\frac{K^{\prime\prime}(0)}{\bkappa_{1, k}^\top \bK_0^{-1}\bkappa_{1, k}} + 1}\right). \]
+
+\paragraph{Heuristics}
+If we assume the second term above is negligible, then the ``adversary term'' for local concavity would be of the form
+\[ \sum_{j \neq k} |\la \balpha_j, \bkappa_{1, k} \ra|^2. \]
+We may think heuristically of $\bkappa_{1, k}$ as having an equal positive and negative weight on entries $k \pm 1$ respectively, whereby this computes the total ``gradient'' of each $\balpha_j$ between entries $k \pm 1$.
+Thus, to the extent that $\bK_0^{-1}$, the solution operator of Dirichlet interpolation, operates in a ``local'' way, the only significant contributions should come from the first few neighbors on either side of dimension $k$.
+(Indeed, away from these neighbors we expect the second correction term to be small as well, since the leading factor will be small according to the decay of $K^{\prime\prime}$ away from zero.)
+
 \clearpage
 
 \bibliographystyle{unsrt}
