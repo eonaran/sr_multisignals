@@ -19,18 +19,23 @@ def uniform_sign_pattern_1d(size):
     return np.array(ret)
 
 
-def uniform_sign_pattern_multidim(size1, size2, orthogonal=False):
+def uniform_sign_pattern_multidim(size1, size2, orthogonal=True, sparse = True):
     if orthogonal:
-        # Generate orthogonal columns by taking the QR decomposition of a
-        # random GUE matrix
-        ret = np.zeros((size1, size1))
-        iid_normals = (
-            np.random.normal(loc=0.0, scale=1.0, size=(size1, size1)) +
-            np.random.normal(loc=0.0, scale=1.0, size=(size1, size1)) * 1j) / (
-                np.sqrt(2.0))
-        gue = (iid_normals + iid_normals.T) / np.sqrt(2.0)
-        q = np.linalg.qr(gue)[0]
-        return q[:, :size2]
+        if sparse:
+            assert size2 >= size1
+            V = np.identity(size2)
+            return V[:size1, :]
+        else:
+            # Generate orthogonal columns by taking the QR decomposition of a
+            # random GUE matrix
+            ret = np.zeros((size1, size1))
+            iid_normals = (
+                np.random.normal(loc=0.0, scale=1.0, size=(size1, size1)) +
+                np.random.normal(loc=0.0, scale=1.0, size=(size1, size1)) * 1j) / (
+                    np.sqrt(2.0))
+            gue = (iid_normals + iid_normals.T) / np.sqrt(2.0)
+            q = np.linalg.qr(gue)[0]
+            return q[:, :size2]
     else:
         ret = np.zeros((size1, size2)).astype(np.complex128)
         for i in range(size1):
@@ -174,6 +179,25 @@ def uniform_supports(size, min_separation=None, max_iters=1000):
         else:
             break
 
+    if not pts:
+        return None
+    else:
+        return np.array(sorted(pts))
+
+    
+def exact_supports(size, min_separation, max_iters=1000):
+    if min_separation is None:
+        min_separation = 0.0
+
+    assert (size-1) * min_separation <= 1.0  
+    
+    pts = []
+    x = np.random.uniform(0, 1-(size-1)*min_separation )
+    pts.append(x);        
+    for _ in range(size-1):
+        x = x + min_separation;
+        pts.append(x)        
+ 
     if not pts:
         return None
     else:
