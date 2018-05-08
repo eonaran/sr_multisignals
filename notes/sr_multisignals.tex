@@ -305,6 +305,7 @@
 \newcommand{\bP}{\bm P}
 \newcommand{\bQ}{\bm Q}
 \newcommand{\bR}{\bm R}
+\newcommand{\bS}{\bm S}
 \newcommand{\bV}{\bm V}
 \newcommand{\bW}{\bm W}
 \newcommand{\bX}{\bm X}
@@ -317,7 +318,10 @@
 \newcommand{\bv}{\bm v}
 \newcommand{\bw}{\bm w}
 \newcommand{\bx}{\bm x}
+\newcommand{\bq}{\bm q}
 \newcommand{\bkappa}{\bm \kappa}
+\newcommand{\tp}{\mathsf{3pt}}
+\newcommand{\od}{\mathsf{1D}}
 
 \newcommand{\bmat}[2]{
 	\begin{bmatrix*}[#1]
@@ -333,6 +337,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
 \newtheorem{question}{Question}
+\newtheorem{task}{Task}
 \newtheorem{definition}{Definition}
 \newtheorem{example}{Example}
 \newtheorem{proposition}{Proposition}
@@ -347,6 +352,103 @@
 \maketitle
 
 \noindent
+
+\section{Outline}
+
+\subsection{Dual Certificate Construction}
+
+The argument by analogy with $L^2$ minimization gives us a natural construction, so long as we are committed to using the Dirichlet kernel:
+\begin{align*}
+  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \sum_{j = 1}^s \beta_jV_{j, k} K^\prime(t - t_j) \\
+  \text{subject to} &\HS q_k(t_j) = V_{j, k} \HS \forall j \in [s], k \in [m] \tag{\text{INT-FULL}} \\
+                  &\HS \la \bq^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
+\end{align*}
+Drawing from \cite{fernandez2016super}, it is also plausible that, once we have this, we can swap out the kernel $K$ for any other reasonable kernel and get a sensible construction.
+If we do this, we lose the $L^2$ minimization property, but it is not clear how to use that anyway.
+
+\begin{task}
+    (Moderately well-defined.)
+    Experiment numerically on whether non-Dirichlet kernels (Fejer, more generally $K^{2d}$, or even more generally products of Dirichlet kernels with different cutoffs like in \cite{fernandez2016super}) improve (INT-FULL) numerically.
+    Is there any benefit from the kernel being positive?
+\end{task}
+
+\subsection{Special Case: Orthogonal Signs}
+
+Assuming the $\bv_j$ are orthogonal, without loss of generality we may rotate them to the standard basis, and we get the following simplified problem.
+\begin{align*}
+  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \beta_kK^\prime(t - t_k) \\
+  \text{subject to} &\HS q_k(t_j) = \delta_{j, k} \HS \forall j \in [s], k \in [m] \tag{\text{INT-ORTH}} \\
+                  &\HS q_k^\prime(t_k) = 0 \HS \forall k \in [m]
+\end{align*}
+Note that the constraints on the dimension $q_k$ are now decoupled; therefore, this problem is just a combination of $m$ independent copies of interpolation problems of the following kind:
+\begin{align*}
+  \text{find} &\HS q(t) = \sum_{j = 1}^{s} \alpha_j K(t - t_j) + \beta K^\prime(t - t_1) \\
+  \text{subject to}
+              &\HS q(t_j) = \delta_{1,j} \HS \forall j \in [s] \tag{\text{INT-1D}} \\
+              &\HS q^\prime(t_1) = 0
+\end{align*}
+Ultimately, if $\bq$ solves (INT-ORTH), we want to control
+\[ N(t) \eqdf \|\bq(t)\|^2 = \sum_{k = 1}^m |q_k(t)|^2. \]
+Per \cite{fernandez2016super} and \cite{tang2013compressed}, this should break up into an analysis near the $t_i$ and away from the $t_i$.
+These two questions each require different estimates on solutions of (INT-1D).
+
+\subsubsection{Information From (INT-1D) For ``Near'' Analysis}
+
+\begin{task}
+    Understand the solution of (INT-1D) near $t_1$ as well as possible.
+    \begin{itemize}
+    \item Is $q^{\prime\prime}(t_1)$ very negative? Does it stay very negative in a neighborhood?
+    \end{itemize}
+\end{task}
+
+\begin{task}
+    Understand the solution of (INT-1D) near $t_j$ where $j \neq 1$ as well as possible.
+    \begin{itemize}
+    \item Is $|q^\prime(t_j)|$ small? Does it stay small in a neighborhood?
+    \item Is $|q^{\prime\prime}(t_j)|$ small? Does it stay small in a neighborhood? (This might not actually be the case---check numerically.)
+    \end{itemize}
+\end{task}
+This is what we need because of the identities
+\begin{align*}
+  N^{\prime\prime}(t) &= 2\Re(\la \bq(t), \bq^{\prime\prime}(t) \ra) + 2\|\bq^\prime(t)\|^2, \\
+  N^{\prime\prime}(t_k) &= 2\Re(q^{\prime\prime}_k(t_k)) + 2\sum_{j \neq k}|q_j^\prime(t_k)|^2.
+\end{align*}
+So, the above information would let us argue as follows, for each fixed $k$:
+\begin{enumerate}
+\item $N^{\prime\prime}(t_k)$ is very negative.
+\item Since $\bq(t_k + \epsilon) \approx \be_k$, $q_k^{\prime\prime}(t_k + \epsilon)$ is negative, and (possibly) $q_j^{\prime\prime}(t_k + \epsilon)$ is small for $j \neq k$, $N^{\prime\prime}(t_k + \epsilon)$ will remain negative for small $\epsilon$.
+\item For whatever range of $\epsilon$ we can ensure this for, we will have $N(t_k + \epsilon) < 1$.
+\end{enumerate}
+
+\subsubsection{Information From (INT-1D) For ``Far'' Analysis}
+
+\begin{task}
+    Bound the solution $|q(t)|$ of (INT-1D) for $t_j < t < t_{j + 1}$ with enough ``margin'' on either side.
+    This depends on how good of an $\epsilon$ we can obtain from the previous part.
+    \begin{itemize}
+    \item For $j \notin \{1, s\}$, $t$ lies away from the first interval on either side of $t_1$, so $|q(t)|$ should be very small.
+    \item For $j \in \{1, s\}$, $t$ lies in the vicinity of the second lobe of a Dirichlet kernel centered at $t_1$, which is roughly how $q(t)$ should look.
+        So, the analysis here might be more delicate (this is also one place where a different kernel may help).
+    \end{itemize}
+\end{task}
+The plan for bounding $N(t)$ is then to simply use the triangle inequality with all of these bounds.
+Note that for any given $t$ in a ``far'' region, there will be exactly two contributions from dimensions for which $t$ is in ``second lobe range'', and $s - 2$ contributions from the rest.
+
+\subsection{Information From (INT-1D) Coefficients}
+
+The next question is what information on $\balpha$ and $\beta$ in (INT-1D) will be necessary to get us the above estimates.
+In \cite{fernandez2016super}, the argument (rewritten in our situation) is that $\balpha \approx \be_1$ and $|\beta| \ll 1$.
+In our case, the former is no longer true for smaller minimum separation, but the latter is still appears to be the case.
+
+In fact, we can eliminate $\beta$ entirely by solving the constraint $q^\prime(t_1) = 0$.
+This leaves us with the reduced problem
+\begin{align*}
+  \text{find} &\HS q(t) = \sum_{j = 1}^{s} \alpha_j \left(K(t - t_j) - \frac{K^{\prime}(t_1 - t_j)}{K^{\prime\prime}(0)}K^\prime(t - t_1)\right) \tag{\text{INT-1D-2}} \\
+  \text{subject to}
+              &\HS q(t_j) = \delta_{1,j} \HS \forall j \in [s]
+\end{align*}
+
+\clearpage
 
 \section{Formal Setup}
 
@@ -376,10 +478,12 @@ Denoting by $y$ the signal we observe in the Fourier domain, we have
 We may then think of the data we observe as simply the $2f_c + 1$ values $y(-f_c), \dots, y(f_c)$.
 We write $\sF_n$ for the sensing operator mapping $x^*$ to these $n$ Fourier coefficients.
 A popular technique for solving this problem is \emph{total variation minimization}, which attempts to recover $x^*$ by solving the convex problem
-\begin{align}
+\begin{equation}
+\begin{aligned}
   \text{minimize} &\HS \|x\|_{\mathsf{TV}} \\
   \text{subject to} &\HS \sF_nx = y.
-\end{align}
+\end{aligned}
+\end{equation}
 
 \subsection{Extension to Multiple Observations}
 
@@ -391,10 +495,12 @@ To formalize this, our true signal is now
 and our observations are $y_{\ell, k} = (\sF_n x^*_\ell)_{k}$ for $k \in \{-f_c, \dots, f_c\}$ and $\ell \in \{1, \dots, m\}$.
 We think of the $a_{\ell, j}$ as organized into vectors $\ba_{j} \in \RR^m$ for $j \in \{1, \dots, s\}$, and the  $y_{\ell, k}$ as organized into a matrix $\bY \in \CC^{m \times n}$.
 The \emph{group total variation minimization} is the natural extension of the previous convex problem to this setting, where we solve
-\begin{align}
+\begin{equation}
+\begin{aligned}
   \text{minimize} &\HS \|x\|_{\mathsf{gTV}} \\
   \text{subject to} &\HS \left[\begin{array}{cccc}\sF_nx_1 & \sF_n x_2 \cdots \sF_n x_m \end{array}\right]^\top = \bY.
-\end{align}
+\end{aligned}
+\end{equation}
 
 \subsection{Dual Certificates}
 
@@ -419,7 +525,9 @@ Therefore, to prove the effectiveness of \textsf{TV} minimization it suffices to
 The main result of \cite{fernandez2016super} establishes that this is true under a minimum separation condition.
 \begin{definition}
     The \emph{minimum separation} of a set $T \subset \TT$ is
-    \[ \Delta(T) = \min_{\substack{s, t \in T \\ s \neq t}} | s - t |, \]
+    \begin{equation}
+        \Delta(T) = \min_{\substack{s, t \in T \\ s \neq t}} | s - t |,
+    \end{equation}
     where we measure the wrap-around distance as on a circle.
 \end{definition}
 
@@ -458,42 +566,59 @@ We first describe a simple approach to choosing interpolation bases based on con
 Minimizing $\|q\|_{L^2([0, 1])}$ under some interpolation constraints is equivalent to interpolating with a restricted basis, the basis arising from the nature of the constraints.
 This general principle can be implemented in specific cases with simple Lagrange multiplier calculations.
 Consider, for instance, the problem
-\begin{align}
+\begin{equation}
+\begin{aligned}
   \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
   \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
-\end{align}
+\end{aligned}
+\end{equation}
 Let us write
-\[ q_{\bc}(t) = \sum_{f = -f_c}^{f_c} c_f \exp(2\pi i ft), \]
+\begin{equation}
+    q_{\bc}(t) = \sum_{f = -f_c}^{f_c} c_f \exp(2\pi i ft),
+\end{equation}
 and define the matrix $\bF_T \in \CC^{s \times (2f_c + 1)}$ by $(\bF_T)_{jf} = \exp(2\pi i ft_j)$, with $-f_c \leq f \leq f_c$.
 Then, the calculation of the values of $q_{\bc}$ on $T$ is a matrix-vector multiplication,
-\[ \left[\begin{array}{c} q_{\bc}(t_1) \\ \vdots \\ q_{\bc}(t_s) \end{array}\right] = \bF_T \bc, \]
+\begin{equation}
+    \left[\begin{array}{c} q_{\bc}(t_1) \\ \vdots \\ q_{\bc}(t_s) \end{array}\right] = \bF_T \bc,
+\end{equation}
 and $\|q_{\bc}\|_{L^2([0, 1])} = \|\bc\|_{2}$.
 Thus, the above problem is equivalently
-\begin{align}
+\begin{equation}
+\begin{aligned}
   \text{minimize} &\HS \|\bc\|_{2} \\
   \text{subject to} &\HS \bF_T\bc = \bv
-\end{align}
+\end{aligned}
+\end{equation}
 We write a Lagrangian $L(\bc, \balpha) = \frac{1}{2}\|\bc\|_2^2 - \la \bm \alpha, \bF_T\bc - \bv \ra$, and upon differentiating and solving the first-order optimality condition obtain $\bc = \bF_T^*\bm \alpha$.
 Generally, we have
-\[ q_{\bF_T^* \bm \alpha}(t) = \sum_{f = -f_c}^{f_c} \left(\sum_{j = 1}^s \exp(-2\pi i ft_j)\alpha_j\right)\exp(2\pi i f t) = \sum_{j = 1}^s \alpha_jK(t - t_j) \]
+\begin{equation}
+    q_{\bF_T^* \bm \alpha}(t) = \sum_{f = -f_c}^{f_c} \left(\sum_{j = 1}^s \exp(-2\pi i ft_j)\alpha_j\right)\exp(2\pi i f t) = \sum_{j = 1}^s \alpha_jK(t - t_j)
+\end{equation}
 where $K$ is the Dirichlet kernel.
 We therefore have found the formal equivalence:
 
 \noindent
 \begin{minipage}{.48\linewidth}
-\begin{align}
+    \vspace{0.5cm}
+\begin{equation*}
+\begin{aligned}
   \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
   \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
-\end{align}
+\end{aligned}
+\end{equation*}
 \end{minipage}
 \begin{minipage}{.04\linewidth}
-    \[ \leftrightarrow \]
+    \begin{equation*}
+        \leftrightarrow
+    \end{equation*}
 \end{minipage}
 \begin{minipage}{.48\linewidth}
-\begin{align}
+\begin{equation}
+\begin{aligned}
   \text{find} &\HS q(t) = \textstyle\sum_{j = 1}^s \alpha_jK(t - t_j) \\
   \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s]
-\end{align}
+\end{aligned}
+\end{equation}
 \end{minipage}
 \vspace{1em}
 
@@ -501,22 +626,27 @@ In the same way, one obtains a justification for the popular trick for allowing 
 
 \noindent
 \begin{minipage}{.48\linewidth}
-\begin{align}
+    \vspace{0.7cm}
+    \begin{equation*}
+\begin{aligned}
   \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\ \\
   \text{subject to} &\HS q(t_j) = v_j \HS \forall j \in [s] \\
                   &\HS q^\prime(t_j) = 0 \HS \forall j \in [s]
-\end{align}
+              \end{aligned}
+          \end{equation*}
 \end{minipage}
 \begin{minipage}{.04\linewidth}
     \[ \leftrightarrow \]
 \end{minipage}
 \begin{minipage}{.48\linewidth}
-\begin{align}
+    \begin{equation}
+\begin{aligned}
   \text{find} &\HS q(t) = \textstyle\sum_{j = 1}^s \alpha_jK(t - t_j) \hs + \\
   &\HS\HS\HS\HS \textstyle\sum_{j = 1}^s\beta_jK^\prime(t - t_j) \\
   \text{subject to} &\HS q(t_j) = v_j \HS \forall j \in [s] \\
                   &\HS q^\prime(t_j) = 0 \HS \forall j \in [s]
-\end{align}
+              \end{aligned}
+          \end{equation}
 \end{minipage}
 \vspace{1em}
 
@@ -527,22 +657,28 @@ Instead, we propose a new construction where this condition is relaxed.
 Rather than setting the derivative at each interpolation point to equal zero, we only constrain it to the tangent plane to the complex unit sphere at that interpolation point.
 [TODO: something about not dividing real from complex for clarity though this helps in numerics].
 Following the ideas in the previous section, we propose as a dual certificate the polynomial solving the following optimization problem:
-\begin{align}
+\begin{equation}
+    \tag{L2-MIN-FULL}
+    \begin{aligned}
   \text{minimize} &\HS \|q\|_{L^2([0, 1])} \\
   \text{subject to} &\HS q(t_j) = \bv_j \HS \forall j \in [s] \\
                   &\HS \la q^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
-\end{align}
+              \end{aligned}
+          \end{equation}
 Performing the translation to an interpolation problem as before gives the following:
-\begin{align}
+\begin{equation}
+    \tag{INT-FULL}
+    \begin{aligned}
   \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \sum_{j = 1}^s \beta_jV_{j, k} K^\prime(t - t_j) \\
   \text{subject to} &\HS q_k(t_j) = V_{j, k} \HS \forall j \in [s], k \in [m] \\
-                  &\HS \la q^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
-\end{align}
+  &\HS \la q^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
+\end{aligned}
+\end{equation}
 where we organize the sign pattern vectors $\bv_j$ as the rows of the matrix $\bV \in \CC^{s \times m}$.
 Note that if we instead took the constraint $q^\prime(t_j) = \bm 0$, then the second term would involve terms $\beta_{j, k}K^\prime(t - t_j)$ in coordinate $k$, but here we are only allowed \emph{one} set of coefficients $\beta_j$ to use across all coordinates.
 This, along with the randomness of the $V_{j, k}$, essentially ensures that the second term cannot often be large: a single vector $\bm \beta$ cannot align with many weakly dependent random vectors $\bV_{\bullet, k}$ at once.
 
-\subsection{Explicit Solution of Interpolation Problem}
+\subsection{Explicit Solution}
 
 Next, we derive concise formulae solving for the coefficients $\bm \alpha$, $\bm \beta$ (when this is possible, which will later need some justification).
 Let $\bK_r = (\frac{d^r}{dt^r}K(t_i - t_j))_{i, j = 1}^s$, then we may write
@@ -556,21 +692,41 @@ Thus, the interpolation equations may be written
   \diag((\bK_1 \balpha + \bK_2\diag(\bbeta) \bV)\bV^*) &= \bm 0
 \end{align}
 From the first equation we obtain
-\[ \balpha = \bK_0^{-1}(\bm I_s - \bK_1 \diag(\bbeta))\bV, \]
+\begin{equation}
+    \balpha = \bK_0^{-1}(\bm I_s - \bK_1 \diag(\bbeta))\bV,
+\end{equation}
 and substituting this into the second obtain
-\[ \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*\bK_2) - \diag(\bV\bV^*\bK_1\bK_0^{-1}\bK_1)}, \]
+\begin{equation}
+    \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*\bK_2) - \diag(\bV\bV^*\bK_1\bK_0^{-1}\bK_1)},
+\end{equation}
 where division in the latter is coordinatewise, and these formulae hold provided $\bK_0$ is invertible and $\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))$ is nowhere zero.
 
-\subsection{Special Case: Orthogonal Signs}
+\section{Special Case: Orthogonal Signs}
 
 Consider the special case where the $\bv_j$ are orthogonal, and for the sake of simplicity $s = m$, so that they form a complete basis.
 Then, without loss of generality we further consider the case where the $\bv_j$ are rotated to equal the standard basis, so that $\bV = \bm I_s$.
 One may then simplify the equations from before, but it is even easier to note directly that the equations governing each polynomial coordinate $q_k(t)$ become decoupled: we are now interested in the interpolation problem
-\begin{align}
+\begin{equation}
+    \tag{INT-ORTH}
+    \begin{aligned}
   \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \beta_kK^\prime(t - t_k) \\
   \text{subject to} &\HS q_k(t_j) = \delta_{j, k} \HS \forall j \in [s], k \in [m] \\
-                  &\HS q_k^\prime(t_k) = 0 \HS \forall k \in [m]
-\end{align}
+  &\HS q_k^\prime(t_k) = 0 \HS \forall k \in [m]
+\end{aligned}
+\end{equation}
+Note that this decomposes into $s$ independent interpolation problems, each of the form
+\begin{equation}
+    \tag{INT-1D}
+    \begin{aligned}
+  \text{find} &\HS q(t) = \sum_{j = 1}^{s} \alpha_j K(t - t_j) + \beta K^\prime(t - t_1) \\
+  \text{subject to}
+              &\HS q(t_j) = \delta_{1,j} \HS \forall j \in [s] \\
+              &\HS q^\prime(t_1) = 0
+          \end{aligned}
+\end{equation}
+
+\subsection{Explicit Solution}
+
 From the second constraint we may directly solve
 \[ \beta_k = -\frac{1}{K^{\prime\prime}(0)}\sum_{j = 1}^s \alpha_{j, k}K^\prime(t_k - t_j), \]
 and therefore
@@ -595,6 +751,75 @@ expressing $\balpha_k$ as a perturbation of of $\bK_0^{-1}\be_k$, which is what 
 Indeed, if only the first term were present, we would simply have $\bm \alpha \approx \bK_0^{-1}$.
 
 Furthermore, observe that $\la \bkappa_{1, k}, \be_k \ra = K^\prime(0) = 0$, so the perturbation term is very small when $\bK_0^{-1}$ is close to the identity, which is the case for large minimum separations.
+
+\subsection{Three-Point Approximation}
+
+We now introduce a means of approximating the solution to (INT-1D).
+The idea is to solve a truncated version of the same problem in closed form, and hope that the resulting solution is close to the true solution of (INT-1D).
+The truncated problem is as follows, obtained by simply ignoring all constraints on points other than $t_s, t_1, t_2$ (the three-point neighborhood surrounding $t_1$, where the interpolant must equal 1).
+Here, it is convenient to assume (without loss of generality) that $t_1 = 0$, and to rename $t_s = -\Delta_-$ and $t_2 = \Delta_{+}$ where $\Delta_{\pm} > 0$, for the sake of more symmetrical notation.
+
+\begin{equation}
+    \tag{INT-1D-TRUNC}
+    \begin{aligned}
+        \text{find} &\HS q(t) = \alpha_0 K(t) + \alpha_+K(t - \Delta_+) + \alpha_-K(t + \Delta_-) + \beta K^\prime(t) \\
+        \text{subject to}
+        &\HS q(0) = 1 \\
+        &\HS q(\Delta_+) = q(-\Delta_-) = 0 \\
+        &\HS q^\prime(0) = 0
+    \end{aligned}
+\end{equation}
+The coefficients of the solution solve the following linear system of equations in four variables:
+\begin{equation}
+    \left[
+        \begin{array}{cccc}
+          K(0) & K(\Delta_+) & K(\Delta_-) & K^{\prime}(0) \\
+          K(\Delta_+) & K(0) & K(\Delta_+ + \Delta_-) & K^\prime(\Delta_+) \\
+          K(\Delta_-) & K(\Delta_+ + \Delta_-) & K(0) & -K^\prime(\Delta_-) \\
+          K^\prime(0) & K^\prime(\Delta_+) & -K^\prime(\Delta_-) & K^{\prime\prime}(0)
+        \end{array}
+    \right]
+    \left[\begin{array}{c} \alpha_0 \\ \alpha_+ \\ \alpha_- \\ \beta \end{array}\right]
+    =
+    \left[\begin{array}{c} 1 \\ 0 \\ 0 \\ 0 \end{array}\right].
+\end{equation}
+We may solve this in closed form, obtaining an explicit (if complicated) function that gives the solution:
+\begin{equation}
+    q^{\tp}(\Delta_+, \Delta_-; t) : [0, 1] \times [0, 1] \times \TT \to \RR
+\end{equation}
+Let us similarly set some notation for the solution of (INT-1D):
+\begin{equation}
+    q^{\od}(T; t): [0, 1]^s \times \TT \to \RR,
+\end{equation}
+then our main hypothesis is that the following approximation is sound: suppose $T = \{0 = t_1, t_2, \dots, t_s\}$ with these points ordered along $\TT$, then
+\begin{equation}
+    q^{\od}(\{0 = t_1, t_2, \dots, t_s\}; \bullet) \approx q^{\tp}(|t_2|, |t_s|; \bullet).
+\end{equation}
+
+
+\section{Further Special Case: Equally Spaced Points}
+
+Consider further a special case where the $t_j$ are all equally spaced in $\TT$, so that $\Delta = 1/s$, and every pair of $t_j, t_{j + 1}$ achieves this spacing exactly in the wraparound metric.
+The point of this simplification is to induce some extra structure in the matrix $\bK_0$ to further ease the formal analysis performed in the previous section.
+If we do this, then if we have $1/s = \Delta = \gamma\lambda_c = \gamma / f_c$, we must have $f_c = \gamma s$ is an integer.
+
+Indeed, in this case we have $t_i - t_j = (i - j)\Delta$ (with equality modulo 1), and therefore
+\[ (\bK_0)_{ij} = K((i - j)\Delta), \]
+so $\bK_0$ is circulant.
+In case $K$ is the Dirichlet kernel, we have $\bK_0 = \bF\bF^*$ where $\bF \in \CC^{s \times (2f_c + 1)}$ having, assuming $t_1 = \Delta$ as we may without loss of generality,
+\[ F_{jf} = \exp(2\pi i t_j f) = \exp(2\pi i jf\Delta) = \exp\left(2\pi i \frac{jf}{s}\right). \]
+That is, $\bF$ is nothing but a discrete Fourier transform (DFT) matrix with some redundant frequencies included.
+In this formulation, we see immediately a simple significance of the threshold $\gamma = \frac{1}{2}$: it is the threshold below which $\bF$ is no longer a complete DFT matrix in dimension $s$.
+
+In this case, the inverse of $\bK_0$ is related to $\bK_0$ itself, which may be seen by computing $\bF^*\bF$, where we see that the usual orthogonality of Fourier harmonics of order $s$ appears:
+\[ (\bF^*\bF)_{fg} = \sum_{j = 0}^{s - 1}\exp\left(2\pi i \frac{j(g - f)}{s}\right) = s[f \equiv g \mod s]. \]
+
+We have $(\bK_0)_{jj} = 2f_c + 1$, and
+\begin{align*}
+  (\bK_0)_{jk}
+  &= \sum_{f = -f_c}^{f_c}\exp\left(2\pi i \frac{(k - j)f}{s}\right) \\
+  &= \frac{\sin((f_c + \frac{1}{2})(k - j))}{\sin(\frac{1}{2}(k - j))}
+\end{align*}
 
 \section{Local Analysis}
 
@@ -635,6 +860,35 @@ Thus, to the extent that $\bK_0^{-1}$, the solution operator of Dirichlet interp
 (Indeed, away from these neighbors we expect the second correction term to be small as well, since the leading factor will be small according to the decay of $K^{\prime\prime}$ away from zero.)
 
 \clearpage
+
+\section{Tools}
+
+\subsection{Bernstein Polynomial Inequality}
+
+The idea of using this comes from \cite{tang2013compressed}.
+The inequality is as follows.
+
+\begin{lemma}
+    Let $p(z)$ be a complex polynomial of degree $N$.
+    Then,
+    \[ \sup_{|z| \leq 1} |p^\prime(z)| \leq N\sup_{|z| \leq 1}|p(z)|. \]
+\end{lemma}
+The way this is used in that paper is basically to argue that a well-bounded polynomial must also have a good Lipschitz property over the unit circle:
+\begin{align*}
+  |p(e^{ix}) - p(e^{iy})|
+  &\leq |e^{-ix} - e^{iy}|\sup_{|z| = 1}|p^\prime(z)| \\
+  &\leq \left(CN\sup_{|z| = 1}|p(z)|\right) |x - y|
+\end{align*}
+There, this is used to show that random polynomials are close to their mean, by showing this on a grid and then applying this Lipschitz property to pass from the grid to the entire interval.
+It's not clear how this can help us, since there is no natural choice of ``comparison'' polynomial.
+
+\subsection{Nazarov Inequality}
+
+\begin{lemma}
+    Let $p(t)$ be a complex trigonometric polynomial of degree $n$, and $E \subset [0, 1]$.
+    Then,
+    \[ \max_{t \in [0, 1]} |p(t)| \leq \left(\frac{C}{m(E)}\right)^{n - 1}\max_{t \in E}|p(t)|. \]
+\end{lemma}
 
 \bibliographystyle{unsrt}
 \bibliography{main}
