@@ -185,18 +185,26 @@ def uniform_supports(size, min_separation=None, max_iters=1000):
         return np.array(sorted(pts))
 
     
-def exact_supports(size, min_separation, max_iters=1000):
-    if min_separation is None:
-        min_separation = 0.0
-
-    assert (size-1) * min_separation <= 1.0  
-    
+def exact_supports(size, separation, max_iters=1000):
+    if separation is None:
+        separation = 0.0
+        
     pts = []
-    x = np.random.uniform(0, 1-(size-1)*min_separation )
-    pts.append(x);        
-    for _ in range(size-1):
-        x = x + min_separation;
-        pts.append(x)        
+    if not isinstance(separation, list):
+        assert (size-1) * separation <= 1.0        
+        x = np.random.uniform(0, 1-(size-1)*separation )
+        pts.append(x);        
+        for _ in range(size-1):
+            x = x + separation;
+            pts.append(x)
+    else:
+        assert sum(separation) <= 1.0  
+        x = np.random.uniform(0, 1- sum(separation))
+        pts.append(x)
+        size = len(separation)+1
+        for k in range(size-1):
+            x = x + separation[k];
+            pts.append(x)                
  
     if not pts:
         return None

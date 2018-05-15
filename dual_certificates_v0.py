@@ -1,6 +1,6 @@
 """Tools for creating interpolation-based dual certificates."""
 
-from trig_poly import TrigPoly, MultiTrigPoly
+from trig_poly_v0 import TrigPoly, MultiTrigPoly
 
 import mpmath
 import numpy as np
