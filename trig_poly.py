@@ -154,3 +154,6 @@ class MultiTrigPoly(object):
 
     def __call__(self, t):
         return self.eval(t)
+
+    def derivative2(self, t):
+        return np.stack([p.derivative().derivative()(t) for p in self.polys], axis=0)
