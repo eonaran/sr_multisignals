@@ -77,9 +77,9 @@ def plot_individual_magnitude(p, support, qs, ts, points=200, plot_Nt = True):
         
     plot_support_magnitude_lines(support[[qss-1 for qss in qs]], start = 0.9,  c = 'C'+str(j) )
     j = j+1
-    plot_magnitude_bounds(ts[0], ts[-1],  c = 'C'+str(j))
+    ax.axhline(1.0, c = 'C'+str(j))
     
-    leg = plt.legend(loc='best',ncol=3, fancybox=True)
+    leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
 
 def plot_individual_components(coeffs, support, kernel, kernel_1, qs, ts, hops, diff_color = False):
@@ -91,7 +91,7 @@ def plot_individual_components(coeffs, support, kernel, kernel_1, qs, ts, hops, 
     for k in [qss-1 for qss in qs]:
         for s in range(max( k - hops, 0), min(k+hops+1, n)  ):
             alp_k_s = kernel.sum_shifts([-support[s]], [coeffs[4*k*n+s]] ) + kernel.sum_shifts([-support[s]], [coeffs[(4*k+2)*n+s] * 1j])
-            ax.plot(ts, np.real(alp_k_s(ts)), c = 'C'+str(j), label=r'Re{$\alpha_{%d,%d} K(t-t_{%d})} $'%(s+1,k+1,s+1) )
+            ax.plot(ts, np.real(alp_k_s(ts)), c = 'C'+str(j), label=r'Re{$\alpha_{%d,%d} K(t-t_{%d}) $}'%(s+1,k+1,s+1) )
             if diff_color:
                 j = j+1
             if s == k:
@@ -102,11 +102,13 @@ def plot_individual_components(coeffs, support, kernel, kernel_1, qs, ts, hops, 
         if ~diff_color:
             j  = j+1
     
-    plot_support_magnitude_lines(support[[qss-1 for qss in qs]], start = 0.9,  c = 'C'+str(j) )
+    plot_support_magnitude_lines(support[[qss-1 for qss in qs]], start = 0.0,  c = 'C'+str(j) )
+    
     j = j+1
-    plot_magnitude_bounds(ts[0], ts[-1],  c = 'C'+str(j))
+    ax.axhline(0.0, c = 'C'+str(j))
+    ax.axhline(1.0, c = 'C'+str(j))    
 
-    leg = plt.legend(loc='best',ncol=2, fancybox=True)
+    leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
     
 def plot_2ndder_zoom(p, support, q, ts, hops):    
@@ -140,12 +142,45 @@ def plot_2ndder_zoom(p, support, q, ts, hops):
     ax.plot([support[i] for i in range(len(support)) if i!=q-1 ], np.zeros(len(support)-1), 'C'+str(j)+'o', ms = 4) 
     
     j = j+1
-    plot_magnitude_bounds(ts[0], ts[-1],  c = 'C'+str(j))
+    ax.axhline(0.0, c = 'C'+str(j))
     
-    leg = plt.legend(loc='best',ncol=3, fancybox=True, mode= 'expand')
+    leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
     
+def plot_coeffs(coeffs, m, fc):
+    n = len(coeffs)/4/m;    
+    alphas_real = [coeffs[4*k*n:(4*k+1)*n] for k in range(m)]
+    betas_real = [fc*coeffs[(4*k+1)*n:(4*k+2)*n] for k in range(m)]
+    alphas_real = np.reshape(alphas_real, (n,m)).T
+    betas_real = np.reshape(betas_real, (n,m)).T
+    alphas_imag = [coeffs[(4*k+2)*n:(4*k+3)*n] for k in range(m)]
+    betas_imag = [coeffs[(4*k+3)*n:(4*k+4)*n] for k in range(m)]
+    alphas_imag = np.reshape(alphas_imag, (n,m)).T
+    betas_imag = np.reshape(betas_imag, (n,m)).T
     
+    plt.figure(figsize=[2.5*f for f in figsize], dpi=100)
+    plt.subplot(221)
+    plt.imshow(np.absolute(alphas_real))
+    for (j,i),label in np.ndenumerate(np.around(np.absolute(alphas_real),3)):
+        plt.text(i,j,label,ha='center',va='center')
+    plt.ylabel(r'$j$')
+    plt.xlabel(r'$k$')
+    plt.title(r'$|\alpha_{jk}|$')
+    plt.colorbar()
+    plt.gca().set_xticklabels([int(i+1) for i in plt.gca().get_xticks()])
+    plt.gca().set_yticklabels([int(i+1) for i in plt.gca().get_yticks()])
+    
+    plt.subplot(222)
+    plt.imshow(np.absolute(betas_real))
+    for (j,i),label in np.ndenumerate(np.around(np.absolute(betas_real),3)):
+        plt.text(i,j,label,ha='center',va='center')
+    plt.ylabel(r'$j$')
+    plt.xlabel(r'$k$')
+    plt.title(r'$|\beta_{jk}|$')
+    plt.colorbar()
+    plt.gca().set_xticklabels([int(i+1) for i in plt.gca().get_xticks()])
+    plt.gca().set_yticklabels([int(i+1) for i in plt.gca().get_yticks()])
+
 def plot_support_magnitude_lines(support, start= 0.0, height=1.0, ax=None, c='green'):
     ax = ax or plt.gca()
 
