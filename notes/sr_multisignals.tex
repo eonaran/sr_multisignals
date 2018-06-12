@@ -296,6 +296,7 @@
 \newcommand{\bbeta}{\bm \beta}
 \newcommand{\bA}{\bm A}
 \newcommand{\bB}{\bm B}
+\newcommand{\bC}{\bm C}
 \newcommand{\bD}{\bm D}
 \newcommand{\bF}{\bm F}
 \newcommand{\bG}{\bm G}
@@ -352,103 +353,6 @@
 \maketitle
 
 \noindent
-
-\section{Outline}
-
-\subsection{Dual Certificate Construction}
-
-The argument by analogy with $L^2$ minimization gives us a natural construction, so long as we are committed to using the Dirichlet kernel:
-\begin{align*}
-  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \sum_{j = 1}^s \beta_jV_{j, k} K^\prime(t - t_j) \\
-  \text{subject to} &\HS q_k(t_j) = V_{j, k} \HS \forall j \in [s], k \in [m] \tag{\text{INT-FULL}} \\
-                  &\HS \la \bq^\prime(t_j), \bv_j \ra = 0 \HS \forall j \in [s]
-\end{align*}
-Drawing from \cite{fernandez2016super}, it is also plausible that, once we have this, we can swap out the kernel $K$ for any other reasonable kernel and get a sensible construction.
-If we do this, we lose the $L^2$ minimization property, but it is not clear how to use that anyway.
-
-\begin{task}
-    (Moderately well-defined.)
-    Experiment numerically on whether non-Dirichlet kernels (Fejer, more generally $K^{2d}$, or even more generally products of Dirichlet kernels with different cutoffs like in \cite{fernandez2016super}) improve (INT-FULL) numerically.
-    Is there any benefit from the kernel being positive?
-\end{task}
-
-\subsection{Special Case: Orthogonal Signs}
-
-Assuming the $\bv_j$ are orthogonal, without loss of generality we may rotate them to the standard basis, and we get the following simplified problem.
-\begin{align*}
-  \text{find} &\HS q_k(t) = \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \beta_kK^\prime(t - t_k) \\
-  \text{subject to} &\HS q_k(t_j) = \delta_{j, k} \HS \forall j \in [s], k \in [m] \tag{\text{INT-ORTH}} \\
-                  &\HS q_k^\prime(t_k) = 0 \HS \forall k \in [m]
-\end{align*}
-Note that the constraints on the dimension $q_k$ are now decoupled; therefore, this problem is just a combination of $m$ independent copies of interpolation problems of the following kind:
-\begin{align*}
-  \text{find} &\HS q(t) = \sum_{j = 1}^{s} \alpha_j K(t - t_j) + \beta K^\prime(t - t_1) \\
-  \text{subject to}
-              &\HS q(t_j) = \delta_{1,j} \HS \forall j \in [s] \tag{\text{INT-1D}} \\
-              &\HS q^\prime(t_1) = 0
-\end{align*}
-Ultimately, if $\bq$ solves (INT-ORTH), we want to control
-\[ N(t) \eqdf \|\bq(t)\|^2 = \sum_{k = 1}^m |q_k(t)|^2. \]
-Per \cite{fernandez2016super} and \cite{tang2013compressed}, this should break up into an analysis near the $t_i$ and away from the $t_i$.
-These two questions each require different estimates on solutions of (INT-1D).
-
-\subsubsection{Information From (INT-1D) For ``Near'' Analysis}
-
-\begin{task}
-    Understand the solution of (INT-1D) near $t_1$ as well as possible.
-    \begin{itemize}
-    \item Is $q^{\prime\prime}(t_1)$ very negative? Does it stay very negative in a neighborhood?
-    \end{itemize}
-\end{task}
-
-\begin{task}
-    Understand the solution of (INT-1D) near $t_j$ where $j \neq 1$ as well as possible.
-    \begin{itemize}
-    \item Is $|q^\prime(t_j)|$ small? Does it stay small in a neighborhood?
-    \item Is $|q^{\prime\prime}(t_j)|$ small? Does it stay small in a neighborhood? (This might not actually be the case---check numerically.)
-    \end{itemize}
-\end{task}
-This is what we need because of the identities
-\begin{align*}
-  N^{\prime\prime}(t) &= 2\Re(\la \bq(t), \bq^{\prime\prime}(t) \ra) + 2\|\bq^\prime(t)\|^2, \\
-  N^{\prime\prime}(t_k) &= 2\Re(q^{\prime\prime}_k(t_k)) + 2\sum_{j \neq k}|q_j^\prime(t_k)|^2.
-\end{align*}
-So, the above information would let us argue as follows, for each fixed $k$:
-\begin{enumerate}
-\item $N^{\prime\prime}(t_k)$ is very negative.
-\item Since $\bq(t_k + \epsilon) \approx \be_k$, $q_k^{\prime\prime}(t_k + \epsilon)$ is negative, and (possibly) $q_j^{\prime\prime}(t_k + \epsilon)$ is small for $j \neq k$, $N^{\prime\prime}(t_k + \epsilon)$ will remain negative for small $\epsilon$.
-\item For whatever range of $\epsilon$ we can ensure this for, we will have $N(t_k + \epsilon) < 1$.
-\end{enumerate}
-
-\subsubsection{Information From (INT-1D) For ``Far'' Analysis}
-
-\begin{task}
-    Bound the solution $|q(t)|$ of (INT-1D) for $t_j < t < t_{j + 1}$ with enough ``margin'' on either side.
-    This depends on how good of an $\epsilon$ we can obtain from the previous part.
-    \begin{itemize}
-    \item For $j \notin \{1, s\}$, $t$ lies away from the first interval on either side of $t_1$, so $|q(t)|$ should be very small.
-    \item For $j \in \{1, s\}$, $t$ lies in the vicinity of the second lobe of a Dirichlet kernel centered at $t_1$, which is roughly how $q(t)$ should look.
-        So, the analysis here might be more delicate (this is also one place where a different kernel may help).
-    \end{itemize}
-\end{task}
-The plan for bounding $N(t)$ is then to simply use the triangle inequality with all of these bounds.
-Note that for any given $t$ in a ``far'' region, there will be exactly two contributions from dimensions for which $t$ is in ``second lobe range'', and $s - 2$ contributions from the rest.
-
-\subsection{Information From (INT-1D) Coefficients}
-
-The next question is what information on $\balpha$ and $\beta$ in (INT-1D) will be necessary to get us the above estimates.
-In \cite{fernandez2016super}, the argument (rewritten in our situation) is that $\balpha \approx \be_1$ and $|\beta| \ll 1$.
-In our case, the former is no longer true for smaller minimum separation, but the latter is still appears to be the case.
-
-In fact, we can eliminate $\beta$ entirely by solving the constraint $q^\prime(t_1) = 0$.
-This leaves us with the reduced problem
-\begin{align*}
-  \text{find} &\HS q(t) = \sum_{j = 1}^{s} \alpha_j \left(K(t - t_j) - \frac{K^{\prime}(t_1 - t_j)}{K^{\prime\prime}(0)}K^\prime(t - t_1)\right) \tag{\text{INT-1D-2}} \\
-  \text{subject to}
-              &\HS q(t_j) = \delta_{1,j} \HS \forall j \in [s]
-\end{align*}
-
-\clearpage
 
 \section{Formal Setup}
 
@@ -750,7 +654,25 @@ and we obtain the formula
 expressing $\balpha_k$ as a perturbation of of $\bK_0^{-1}\be_k$, which is what we would obtain if we were simply doing Dirichlet kernel interpolation on the sign pattern $\be_k$.
 Indeed, if only the first term were present, we would simply have $\bm \alpha \approx \bK_0^{-1}$.
 
-Furthermore, observe that $\la \bkappa_{1, k}, \be_k \ra = K^\prime(0) = 0$, so the perturbation term is very small when $\bK_0^{-1}$ is close to the identity, which is the case for large minimum separations.
+\subsection{Approximation of $K_0^{-1}$}
+We build an approximation of $\bK_0^{-1}$ column by column.
+Without loss of generality, suppose we are interested in approximating the second column of $\bK_0^{-1}$.
+Our approximation will consist in estimating the first, second, and third entries, and claiming that the remaining entries must be small.
+Let us write
+\begin{equation}
+    \bK_0 = \left[ \begin{array}{cc} \bA & \bB \\ \bB^\top & \bC \end{array} \right],
+\end{equation}
+with $\bA \in \RR^{3 \times 3}$, $\bB \in \RR^{3 \times (s - 3)}$, and $\bC \in \RR^{(s - 3) \times (s - 3)}$.
+Inverting the block matrix, we find that the first three columns of the inverse are given by
+\begin{equation}
+    \bK_0^{-1} = \left[ \begin{array}{cc} \bA^{-1} + \bA^{-1}\bB(\bK_0 / \bA)^{-1}\bB^\top \bA^{-1} & \cdots \\ -(\bK_0 / \bA)^{-1}\bB^\top \bA^{-1} & \cdots \end{array} \right],
+\end{equation}
+where $\bK_0 / \bA = \bC - \bB^\top \bA^{-1} \bB$ is the Schur complement.
+We will argue that the terms besides $\bA^{-1}$ are small by showing that $\bB$ is small and the other terms are not too large.
+We have
+\begin{align}
+  \|\bB\|_\infty = \max_{i \in \{1, 2, 3\}} \sum_{j = 1}^{n - 3} |B_{ij}|
+\end{align}
 
 \subsection{Three-Point Approximation}
 

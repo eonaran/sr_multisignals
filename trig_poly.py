@@ -124,11 +124,11 @@ class TrigPoly(object):
             max_freq = max(max(self.freqs), max(other.freqs))
             all_freqs = range(min_freq, max_freq + 1)
 
-            all_self_coeffs = np.zeros(len(all_freqs))
+            all_self_coeffs = np.zeros(len(all_freqs), dtype=np.complex)
             for f, c in zip(self.freqs, self.coeffs):
                 all_self_coeffs[f - min_freq] = c
 
-            all_other_coeffs = np.zeros(len(all_freqs))
+            all_other_coeffs = np.zeros(len(all_freqs), dtype=np.complex)
             for f, c in zip(other.freqs, other.coeffs):
                 all_other_coeffs[f - min_freq] = c
 
