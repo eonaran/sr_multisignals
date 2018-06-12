@@ -42,7 +42,6 @@ class TrigPoly(object):
             self.freqs.reshape([len(self.freqs)] + [1] * len(t.shape)))
         reshaped_coeffs = (
             self.coeffs.reshape([len(self.coeffs)] + [1] * len(t.shape)))
-
         return np.sum(
             reshaped_coeffs *
             np.exp(2.0 * np.pi * 1j * repeated_ts * reshaped_freqs),
