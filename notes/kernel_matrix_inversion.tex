@@ -1,0 +1,467 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{enumitem}
+\usepackage{amscd}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{amsthm}
+\usepackage{bbold}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{easybmat}
+\usepackage{etex}
+\usepackage{framed}
+\usepackage[dvips,letterpaper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[noabbrev,capitalize]{cleveref}
+\usepackage{mathtools}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{verbatim}
+\usepackage[capitalize]{cleveref}
+
+%
+% Commands
+%
+
+% Figures
+\newcommand{\fig}[1]{(figure \ref{#1})}
+\newcommand{\FIG}[1]{figure \ref{#1}}
+
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+
+% Names
+\newcommand{\Mobius}{M\"{o}bius}
+\newcommand{\Holder}{H\"{o}lder}
+\newcommand{\Rouche}{Rouch\'{e}}
+\newcommand{\Ito}{It\={o}}
+\newcommand{\Kondo}{Kond\^{o}}
+\newcommand{\Levy}{L\'{e}vy}
+\newcommand{\Cramer}{Cram\'{e}r}
+\newcommand{\Godel}{G\"{o}del}
+\newcommand{\Carath}{Carath\'{e}odory}
+\newcommand{\Caratheodory}{Carath\'{e}odory}
+\newcommand{\Hopital}{H\^{o}pital}
+
+% Random
+\renewcommand{\bar}{\overline}
+\newcommand{\lvec}{\overrightarrow}
+\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
+
+% Disjoint union
+\makeatletter
+\def\moverlay{\mathpalette\mov@rlay}
+\def\mov@rlay#1#2{\leavevmode\vtop{%
+   \baselineskip\z@skip \lineskiplimit-\maxdimen
+   \ialign{\hfil$\m@th#1##$\hfil\cr#2\crcr}}}
+\newcommand{\charfusion}[3][\mathord]{
+    #1{\ifx#1\mathop\vphantom{#2}\fi
+        \mathpalette\mov@rlay{#2\cr#3}
+      }
+    \ifx#1\mathop\expandafter\displaylimits\fi}
+\makeatother
+
+\newcommand{\cupdot}{\charfusion[\mathbin]{\cup}{\cdot}}
+\newcommand{\bigcupdot}{\charfusion[\mathop]{\bigcup}{\cdot}}
+
+% Blackboard bold
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\HH}{\mathbb{H}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\renewcommand{\AA}{\mathbb{A}}
+\newcommand{\FF}{\mathbb{F}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\Fp}{\FF_p}
+\newcommand{\TrivGp}{\mathbbold{1}}
+\newcommand{\One}{\mathbbold{1}}
+
+\newcommand{\RP}{\RR\mathrm{P}}
+\newcommand{\CP}{\CC\mathrm{P}}
+
+% Vector bold
+\newcommand{\nn}{\bm{n}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\ww}{\bm{w}}
+\newcommand{\xx}{\bm{x}}
+\newcommand{\yy}{\bm{y}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\one}{\bm{1}}
+
+% Other fonts
+\newcommand{\fp}{\mathfrak{p}}
+\newcommand{\fq}{\mathfrak{q}}
+\newcommand{\fg}{\mathfrak{g}}
+\newcommand{\fh}{\mathfrak{h}}
+\newcommand{\fa}{\mathfrak{a}}
+\newcommand{\fb}{\mathfrak{b}}
+\newcommand{\fc}{\mathfrak{c}}
+\newcommand{\fm}{\mathfrak{m}}
+\renewcommand{\sl}{\mathfrak{sl}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\gl}{\mathfrak{gl}}
+\renewcommand{\sp}{\mathfrak{sp}}
+\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sB}{\mathcal{B}}
+\newcommand{\sC}{\mathcal{C}}
+\newcommand{\sD}{\mathcal{D}}
+\newcommand{\sE}{\mathcal{E}}
+\newcommand{\sF}{\mathcal{F}}
+\newcommand{\sG}{\mathcal{G}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sI}{\mathcal{I}}
+\newcommand{\sL}{\mathcal{L}}
+\newcommand{\sM}{\mathcal{M}}
+\newcommand{\sN}{\mathcal{N}}
+\newcommand{\sO}{\mathcal{O}}
+\newcommand{\sP}{\mathcal{P}}
+\newcommand{\sR}{\mathcal{R}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sU}{\mathcal{U}}
+\newcommand{\sV}{\mathcal{V}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
+
+% Spacing
+\newcommand\ThmBr{%
+    \@ifstar{\item[\vbox{\null}]}{%
+      \begingroup % keep changes local
+      \setlength\itemsep{0pt}%
+      \setlength\parsep{0pt}%
+       \item[\vbox{\null}]%
+      \endgroup%
+     }}
+\newcommand{\br}{\vspace{1pc}}
+\newcommand{\BR}{\vspace{2pc}}
+\newcommand{\picspace}{\vspace{13pc}}
+\newcommand{\hs}{\hspace{1mm}}
+\newcommand{\HS}{\hspace{3.5mm}}
+\newcommand{\hr}{
+  \begin{center}
+    \line(1,0){250}
+  \end{center}
+}
+\newcommand{\hrs}{
+  \begin{center}
+    \line(1,0){150}
+  \end{center}
+}
+
+\newcommand{\adj}{\mathsf{adj}}
+
+% Plain text
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\newcommand{\disc}{\mathrm{disc}}
+\newcommand{\Ann}{\mathrm{Ann}}
+\newcommand{\Ass}{\mathrm{Ass}}
+\newcommand{\Soc}{\mathrm{Soc}}
+\newcommand{\Supp}{\mathrm{Supp}}
+\newcommand{\Spec}{\mathrm{Spec}}
+\newcommand{\maxSpec}{\mathrm{maxSpec}}
+
+\newcommand{\N}{\mathrm{N}}
+\newcommand{\Tr}{\mathrm{Tr}}
+
+% Functors
+\newcommand{\Hom}{\mathrm{Hom}}
+\newcommand{\Der}{\mathrm{Der}}
+\newcommand{\End}{\mathrm{End}}
+\newcommand{\Ind}{\mathrm{Ind}}
+\newcommand{\Aut}{\mathrm{Aut}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Rad}{\mathrm{Rad}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\Pow}{\mathrm{Pow}}
+\newcommand{\diam}{\mathrm{diam}}
+
+\newcommand{\img}{\mathrm{img}}
+\newcommand{\sgn}{\mathrm{sgn}}
+
+\newcommand{\ch}{\mathrm{char}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\ord}{\mathrm{ord}}
+\newcommand{\cont}{\mathrm{cont}}
+\newcommand{\ab}{\mathrm{ab}}
+\newcommand{\Orb}{\mathrm{Orb}}
+\newcommand{\Syl}{\mathrm{Syl}}
+\newcommand{\Irr}{\mathrm{Irr}}
+\newcommand{\Frac}{\mathrm{Frac}}
+\newcommand{\sep}{\mathrm{sep}}
+\newcommand{\per}{\mathrm{per}}
+
+% Groups
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\PGL}{\mathrm{PGL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
+\newcommand{\oO}{\mathrm{O}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\PSO}{\mathrm{PSO}}
+\newcommand{\Sp}{\mathrm{Sp}}
+\newcommand{\PSp}{\mathrm{PSp}}
+\newcommand{\U}{\mathrm{U}}
+\newcommand{\SU}{\mathrm{SU}}
+\newcommand{\PSU}{\mathrm{PSU}}
+
+% Parentheses
+\newcommand{\lgndr}[2]{\ensuremath{\left(\frac{#1}{#2}\right)}}
+
+% Mappings
+\newcommand{\iso}{\cong}
+\newcommand{\eqdf}{\stackrel{\mathrm{df}}{=}}
+\newcommand{\eqd}{\stackrel{\mathrm{d}}{=}}
+\newcommand{\eqqu}{\stackrel{\mathrm{?}}{=}}
+\newcommand{\xto}{\xrightarrow}
+\newcommand{\dto}{\Rightarrow}
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\xinto}{\xhookrightarrow}
+\newcommand{\onto}{\twoheadrightarrow}
+\newcommand{\xonto}{xtwoheadrightarrow}
+\newcommand{\isoto}{\xto{\sim}}
+\newcommand{\upto}{\nearrow}
+\newcommand{\downto}{\searrow}
+
+% Convenience
+\newcommand{\Implies}{\ensuremath{\Rightarrow}}
+\newcommand{\ImpliedBy}{\ensuremath{\Leftarrow}}
+\newcommand{\Iff}{\ensuremath{\Leftrightarrow}}
+
+\newcommand{\Pfright}{\ensuremath{(\Rightarrow):\hs}}
+\newcommand{\Pfleft}{\ensuremath{(\Leftarrow):\hs}}
+
+\newcommand{\sm}{\ensuremath{\setminus}}
+
+\newcommand{\tab}[1]{(table \ref{#1})}
+\newcommand{\TAB}[1]{table \ref{#1}}
+
+\newcommand{\precode}[1]{\textbf{\footnotesize #1}}
+\newcommand{\code}[1]{\texttt{\footnotesize #1}}
+
+\newcommand{\sectionline}{
+  \nointerlineskip \vspace{\baselineskip}
+  \hspace{\fill}\rule{0.35\linewidth}{.7pt}\hspace{\fill}
+  \par\nointerlineskip \vspace{\baselineskip}
+}
+
+
+%
+% Misc
+%
+
+\parskip0em
+\linespread{1.05}
+\widowpenalty10000
+\clubpenalty10000
+
+
+\newcommand{\HC}{\mathsf{HC}}
+\newcommand{\CHC}{\mathsf{CHC}}
+\newcommand{\SK}{\mathsf{SK}}
+\newcommand{\SDP}{\mathsf{SDP}}
+\newcommand{\SOS}{\mathsf{SOS}}
+\newcommand{\PE}{\mathsf{PE}}
+\newcommand{\PS}{\mathsf{PS}}
+\newcommand{\tEE}{\tilde{\mathbb{E}}}
+\newcommand{\tCov}{\widetilde{\mathrm{Cov}}}
+\newcommand{\sfP}{\mathsf{P}}
+\newcommand{\argmin}{\mathrm{argmin}}
+\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\diag}{\mathsf{diag}}
+\newcommand{\eq}{\mathsf{eq}}
+\newcommand{\der}{\mathsf{der}}
+\newcommand{\vrad}{\mathrm{vrad}}
+\newcommand{\rk}{\mathrm{rk}}
+\newcommand{\rkeff}{\mathrm{rk}_{\mathrm{eff}}}
+\newcommand{\GOE}{\mathsf{GOE}}
+\newcommand{\ssG}{\mathsf{G}}
+\newcommand{\balpha}{\bm \alpha}
+\newcommand{\blambda}{\bm \lambda}
+\newcommand{\bbeta}{\bm \beta}
+\newcommand{\bA}{\bm A}
+\newcommand{\bB}{\bm B}
+\newcommand{\bC}{\bm C}
+\newcommand{\bD}{\bm D}
+\newcommand{\bF}{\bm F}
+\newcommand{\bG}{\bm G}
+\newcommand{\bH}{\bm H}
+\newcommand{\bK}{\bm K}
+\newcommand{\bM}{\bm M}
+\newcommand{\bP}{\bm P}
+\newcommand{\bQ}{\bm Q}
+\newcommand{\bR}{\bm R}
+\newcommand{\bS}{\bm S}
+\newcommand{\bV}{\bm V}
+\newcommand{\bW}{\bm W}
+\newcommand{\bX}{\bm X}
+\newcommand{\bY}{\bm Y}
+\newcommand{\ba}{\bm a}
+\newcommand{\bb}{\bm b}
+\newcommand{\bc}{\bm c}
+\newcommand{\be}{\bm e}
+\newcommand{\bg}{\bm g}
+\newcommand{\bv}{\bm v}
+\newcommand{\bw}{\bm w}
+\newcommand{\bx}{\bm x}
+\newcommand{\bq}{\bm q}
+\newcommand{\bkappa}{\bm \kappa}
+\newcommand{\tp}{\mathsf{3pt}}
+\newcommand{\od}{\mathsf{1D}}
+
+\newcommand{\bmat}[2]{
+	\begin{bmatrix*}[#1]
+		#2
+	\end{bmatrix*}
+}
+
+\DeclareRobustCommand{\bmrob}[1]{\bm{#1}}
+\pdfstringdefDisableCommands{%
+  \renewcommand{\bmrob}[1]{#1}%
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{task}{Task}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\begin{document}
+
+\noindent
+
+\section{Setup}
+
+Let $K: \TT \to \RR$ be an even low-pass kernel of cutoff frequency $f_c$ with $K(0) = 1$, and $t_1, \dots, t_s \in \TT$ with minimum separation $\Delta$.
+Write $|t_i - t_j|$ for the wraparound distance between $t_i$ and $t_j$, so that $K(t_i - t_j) = K(|t_i - t_j|)$.
+
+Some quantities on $K$ that we will need to estimate: suppose that $\Delta$ is fixed, then we define
+\begin{align*}
+  M(c) &= \sup_{|t| \geq c\Delta} |K(t)| \\
+  S_p(t) &= \sup_{\{t_i\}} \sum_{t_j \in T \setminus \{t_0\}} |K(t - t_j)|^p \\
+  S(t) &= S_1(t) \\
+  T_p(t) &= \sup_{\{t_i\}} \sum_{t_j \in T \setminus \{t_{-1}, t_0, t_1\}} |K(t - t_j)|^p \\
+  T(t) &= T_1(t)
+\end{align*}
+
+Write the matrix $\bK = (K(|t_i - t_j|))_{i, j = 1}^s$, then we want to estimate $\bK^{-1}$.
+
+\section{Outline}
+
+Suppose we are interested in estimating the second column of $\bK^{-1}$.
+We have two goals: (1) get good estimates of the first, second, and third entries, and (2) establish that the remaining entries down the column decay.
+
+We expand into a block matrix
+\begin{equation}
+    \bK = \left[ \begin{array}{cc} \bA & \bB \\ \bB^\top & \bC \end{array} \right],
+\end{equation}
+with $\bA \in \RR^{3 \times 3}$, $\bB \in \RR^{3 \times (s - 3)}$, and $\bC \in \RR^{(s - 3) \times (s - 3)}$.
+Inverting the block matrix, we find that the first three columns of the inverse are given by
+\begin{equation}
+    \bK^{-1} = \left[ \begin{array}{cc} \bA^{-1} + \bA^{-1}\bB(\bK / \bA)^{-1}\bB^\top \bA^{-1} & \cdots \\ -(\bK / \bA)^{-1}\bB^\top \bA^{-1} & \cdots \end{array} \right],
+\end{equation}
+where $\bK / \bA = \bC - \bB^\top \bA^{-1} \bB$ is the Schur complement.
+
+\section{Computing main contribution}
+
+We will use the explicit formula for the inverse of $\bA$,
+\[ \bA^{-1} = \frac{\adj(\bA)}{\det(\bA)}, \]
+where (using symmetry and that $\diag(\bA) = \one$ to simplify)
+\begin{align*}
+  \det(\bA) &= 1 - K(|t_2 - t_3|)^2 - K(|t_1 - t_3|)^2 - K(|t_1 - t_2|)^2 + 2K(|t_1 - t_3|)K(|t_2 - t_3|)K(|t_1 - t_2|) \\
+  \adj(\bA) &= 2 \bm I_3 - \bA + \left[
+              \begin{array}{ccc}
+                - K(|t_2 - t_3|)^2 & K(|t_1 - t_3|)K(|t_2 - t_3|) &  K(|t_2 - t_3|)K(|t_1 - t_2|) \\
+                                   K(|t_1 - t_3|)K(|t_2 - t_3|) & -K(|t_1 - t_3|)^2 & K(|t_1 - t_3|)K(|t_1 - t_2|) \\
+                                   K(|t_2 - t_3|)K(|t_1 - t_2|) & K(|t_1 - t_3|)K(|t_1 - t_2|) & -K(|t_1 - t_2|)^2
+              \end{array}\right] \\
+            &= 2 \bm I_3 - \bA + \bD(\bm J_3 - 2\bm I_3)\bD, \text{ where} \\
+  \bD &= \left[
+              \begin{array}{ccc}
+                K(|t_2 - t_3|) & 0 & 0 \\
+                0 & K(|t_1 - t_3|) & 0 \\
+                0 & 0 & K(|t_1 - t_2|)
+              \end{array}\right].
+\end{align*}
+The two terms of the adjugate are $\bA$ with all of its off-diagonal entries negated.
+In the second term, the smallest terms of the diagonal matrices are $K(|t_1 - t_3|)$ (by the minimum separation property, assuming $K$ has good decay), thus we expect the entry in $(2, 2)$ to be the smallest, the other entries in row and column 2 to be bigger but still fairly small, and the rest of the entries to be the largest.
+
+\begin{proposition}[Determinant Bound]
+    \[ |\det(\bA) - 1| \leq 2M(1)^2 + M(2)^2 + 2M(1)^2M(2). \]
+\end{proposition}
+\begin{proof}
+    Triangle inequality on the explicit formula.
+\end{proof}
+
+\begin{proposition}[Conditioning Bound]
+    \[ \|\bA^{-1}\| = \lambda_{\min}(\bA)^{-1} \leq \frac{1}{1 - M(1) - M(2)}. \]
+\end{proposition}
+\begin{proof}
+    Gershgorin circle theorem.
+\end{proof}
+
+\section{Controlling the Schur complement}
+
+We compute the entries of $\bK / \bA$: for $i, j \geq 4$,
+\begin{align*}
+  (\bK / \bA)_{(i - 3)(j - 3)}
+  &= \bK_{ij} - \bK_{i[1:3]}^\top \bA^{-1} \bK_{j[1:3]} \\
+  &= K(|t_i - t_j|) - 2\bK_{i[1:3]}^\top\bK_{j[1:3]} + \bK_{i[1:3]}^\top\bA\bK_{j[1:3]} - \bK_{i[1:3]}^\top\bD\one_3\one_3^\top\bD\bK_{j[1:3]} \\
+  &\hspace{1cm} + 2\bK_{i[1:3]}^\top\bD^2\bK_{j[1:3]} \\
+  &= K(|t_i - t_j|) - 2\sum_{k = 1}^3 K(|t_i - t_k|)K(|t_j - t_k|) + \sum_{k = 1}^3\sum_{\ell = 1}^3K(|t_i - t_k|)K(|t_j - t_\ell|)K(|t_k - t_\ell|) \\
+  &\hspace{1cm} - \bigg(K(|t_i - t_1|)K(|t_2 - t_3|) + K(|t_i - t_2|)K(|t_1 - t_3|) + K(|t_i - t_3|)K(|t_1 - t_2|)\bigg) \times \\
+  &\hspace{1.4cm} \bigg(K(|t_j - t_1|)K(|t_2 - t_3|) + K(|t_j - t_2|)K(|t_1 - t_3|) + K(|t_j - t_3|)K(|t_1 - t_2|)\bigg) \\
+  &\hspace{1cm} + 2K(|t_i - t_1|)K(|t_j - t_1|)K(|t_2 - t_3|)^2 + 2K(|t_i - t_2|)K(|t_j - t_2|)K(|t_1 - t_3|)^2 + 2K(|t_i - t_3|)K(|t_j - t_3|)K(|t_1 - t_2|)^2
+\end{align*}
+We want to control $\|\bm I - (\bK / \bA)\|_{\infty}$, which requires bounding the distance of the diagonal from 1 and bounding the remaining entries.
+For the diagonal, we bound
+\begin{align*}
+  |1 - (\bK / \bA)_{(i - 3)(i - 3)}|
+  &= |\bK_{i[1:3]}^\top \bA^{-1} \bK_{i[1:3]}| \\
+  &\leq \| \bA^{-1} \| \cdot \|\bK_{i[1:3]}\|^2 \\
+  &= \frac{\sum_{k = 1}^3 K(|t_i - t_k|)^2}{\lambda_{\min}(\bA)} \\
+  &\leq \frac{M(i - 1)^2 + M(i - 2)^2 + M(i - 3)^2}{1 - M(1) - M(2)}
+\end{align*}
+On the off-diagonal, we have the naive bound
+\begin{align*}
+  |(\bK / \bA)_{(i - 3)(j - 3)}|
+  &\leq |K_{ij}| + \|\bA^{-1}\| \cdot \|\bK_{i[1:3]}\|_2 \cdot \|\bK_{i[1:3]}\|_2 \\
+  &\leq K(|t_i - t_j|) + \frac{1}{2\lambda_{\min}(\bA)}\left(\|\bK_{i[1:3]}\|_2^2 + \|\bK_{i[1:3]}\|_2^2\right) \\
+  &\leq K(|t_i - t_j|) + \frac{1}{2(1 - M(1) - M(2))}\left(\sum_{k = 1}^3 K(|t_i - t_k|)^2 + \sum_{k = 1}^3 K(|t_j - t_k|)^2 \right)
+\end{align*}
+Therefore,
+\begin{align*}
+  \|\bm I - (\bK / \bA)\|_\infty
+  &\leq \max_i\left\{\|\bA^{-1}\|\cdot \|\bK_{i[1:3]}\|_2^2 + \sum_{j \neq i} K(|t_i - t_j|) +
+
+\section{Error in the first three coordinates}
+
+\section{Decay of coefficients}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

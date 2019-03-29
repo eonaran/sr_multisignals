@@ -9,6 +9,7 @@
 \usepackage{bm}
 \usepackage{booktabs}
 \usepackage{color}
+\usepackage{colonequals}
 \usepackage{easybmat}
 \usepackage{etex}
 \usepackage{framed}
@@ -585,7 +586,11 @@ This, along with the randomness of the $V_{j, k}$, essentially ensures that the 
 \subsection{Explicit Solution}
 
 Next, we derive concise formulae solving for the coefficients $\bm \alpha$, $\bm \beta$ (when this is possible, which will later need some justification).
-Let $\bK_r = (\frac{d^r}{dt^r}K(t_i - t_j))_{i, j = 1}^s$, then we may write
+Let
+\begin{equation}
+    \bK_r \colonequals \left(\frac{d^r}{dt^r}K(t_i - t_j)\right)_{i, j = 1}^s.
+\end{equation}
+Then, we may write
 \begin{align}
   (q_k(t_j))_{j \in [s], k \in [m]} &= \bK_0 \balpha + \bK_1\diag(\bbeta) \bV \\
   (q_k^\prime(t_j))_{j \in [s], k \in [m]} &= \bK_1 \balpha + \bK_2\diag(\bbeta) \bV
@@ -604,6 +609,20 @@ and substituting this into the second obtain
     \bbeta = \frac{\diag(\bV\bV^*\bK_0^{-1}\bK_1)}{\diag(\bV\bV^*\bK_2) - \diag(\bV\bV^*\bK_1\bK_0^{-1}\bK_1)},
 \end{equation}
 where division in the latter is coordinatewise, and these formulae hold provided $\bK_0$ is invertible and $\diag(\bV\bV^*(\bK_2 - \bK_1\bK_0^{-1}\bK_1))$ is nowhere zero.
+
+\subsection{Pointwise Evaluation}
+Let
+\begin{equation}
+    \bm k_r(t) \colonequals \left(\frac{d^r}{dt^r}K(t - t_j)\right)_{j = 1}^s.
+\end{equation}
+\begin{align}
+  \bm q(t)^\top
+  &= \bm k_0(t)^\top \bm\alpha + \bm k_1(t)^\top \diag(\bm\beta) \bV \\
+  &= \bm k_0(t)^\top \bK_0^{-1}(\bm I_s - \bK_1 \diag(\bm\beta))\bV + \bm k_1(t)^\top \diag(\bm\beta) \bV \\
+  &= \bm k_0(t)^\top \bK_0^{-1}\bV + \left(\bm k_1(t)^\top - \bm k_0(t)^\top \bK_0^{-1}\bK_1\right)\diag(\bm\beta) \bV
+\end{align}
+
+[NEXT] Is triangle equality ok in the above?
 
 \section{Special Case: Orthogonal Signs}
 
