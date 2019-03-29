@@ -346,6 +346,9 @@
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
 
+\newcounter{para}
+\newcommand\mypara[1]{\paragraph{\refstepcounter{para}#1}}
+
 \title{Super-Resolution of Point Sources Down to the Rayleigh Limit from Multiple Observations}
 \author{}
 
@@ -800,6 +803,37 @@ We may think heuristically of $\bkappa_{1, k}$ as having an equal positive and n
 Thus, to the extent that $\bK_0^{-1}$, the solution operator of Dirichlet interpolation, operates in a ``local'' way, the only significant contributions should come from the first few neighbors on either side of dimension $k$.
 (Indeed, away from these neighbors we expect the second correction term to be small as well, since the leading factor will be small according to the decay of $K^{\prime\prime}$ away from zero.)
 
+\subsection{Steps}
+Assume orthogonal basis-generating samples (requires $ s\leq m $). For a given $ \epsilon>0 $ (of choice) and for all $ t_i $, $ 1\leq i \leq s $ satisfying minimum separation condition,
+\paragraph{1. $ N^{\prime\prime}(t) $ stays negative for $ t \in [t_i-\epsilon, t_{i}+\epsilon] $} 
+Together with the fact that $ N^\prime(t) = 2\Re(\la q(t), q^\prime(t) \ra) = 0  $ due to construction, this ensures $ N(t)\leq 1 $ for $ t \in [t_i-\epsilon, t_{i}+\epsilon] $. 
+\begin{align}
+	N^{\prime\prime}(t) &= 2\Re\{\la q(t), (q^{\prime\prime}(t))^* \ra\} + 2\|q^\prime(t)\|^2 \\
+	& = 2\sum_{k = 1}^m \Re \{q_k(t) (q^{\prime\prime}_k(t))^*\} + |q_k^\prime(t)|^2 \\
+	& = \sum_{k = 1}^m 2\Re\left\{\underbrace{\left(\sum_{j = 1}^s \alpha_{j, k} K(t - t_j) + \beta_kK^\prime(t - t_k)\right) \left(\sum_{j = 1}^s \alpha_{j, k}^* K^{\prime\prime}(t - t_j) + \beta_k^* K^{\prime\prime\prime}(t - t_k) \right)}_{x_k(t)}\right\} \\
+	&+ \underbrace{\left(\sum_{j = 1}^s \alpha_{j, k} K^{\prime}(t - t_j) + \beta_kK^{\prime\prime}(t - t_k)\right) \left(\sum_{j = 1}^s \alpha_{j, k}^* K^{\prime}(t - t_j) + \beta_k^* K^{\prime\prime}(t - t_k) \right)}_{y_k(t)} 
+\end{align}
+\begin{align}
+	x_k(t)& = \sum_{j = 1}^s\sum_{\ell = 1}^s \alpha_{j, k} K(t - t_j) \alpha_{\ell, k}^* K^{\prime\prime}(t - t_\ell) + \beta_k^* K^{\prime\prime\prime}(t - t_k) \sum_{j = 1}^s \alpha_{j, k} K(t - t_j) \\
+	& +\beta_kK^\prime(t - t_k) \sum_{j = 1}^s \alpha_{j, k}^* K^{\prime\prime}(t - t_j) + \beta_kK^\prime(t - t_k) \beta_k^* K^{\prime\prime\prime}(t - t_k)  
+\end{align}
+For $ t = t_i+\epsilon $,
+\begin{align}
+	x_k(t) &=  \sum_{j = 1}^i\sum_{\ell = 1}^i \alpha_{j, k} \alpha_{\ell, k}^* K(\delta_{i,j}+\epsilon)  K^{\prime\prime}(\delta_{i,\ell} +\epsilon) + \sum_{j = i+1}^s\sum_{\ell = 1}^i \alpha_{j, k} \alpha_{\ell, k}^* K(\delta_{i,j}-\epsilon)  K^{\prime\prime}(\delta_{i,\ell} +\epsilon) \\
+	& + \sum_{j = 1}^i\sum_{\ell = i+1}^s \alpha_{j, k} \alpha_{\ell, k}^* K(\delta_{i,j}+\epsilon)  K^{\prime\prime}(\delta_{i,\ell} -\epsilon)
+	+ \sum_{j = i+1}^s\sum_{\ell = i+1}^s \alpha_{j, k} \alpha_{\ell, k}^* K(\delta_{i,j}-\epsilon)  K^{\prime\prime}(\delta_{i,\ell} -\epsilon) \\
+	& + \beta_k^* K^{\prime\prime\prime}(t_i - t_k+\epsilon) \sum_{j = 1}^i \alpha_{j, k} K(\delta_{i,j} + \epsilon) + \beta_k^* K^{\prime\prime\prime}(t_i - t_k+\epsilon) \sum_{j = i+1}^s \alpha_{j, k} K(\delta_{i,j}-\epsilon)\\
+	&+ \beta_k K^{\prime}(t_i - t_k+\epsilon) \sum_{j = 1}^i \alpha_{j, k}^* K^{\prime\prime}(\delta_{i,j} + \epsilon) + \beta_k K^{\prime}(t_i - t_k+\epsilon) \sum_{j = i+1}^s \alpha_{j, k}^* K^{\prime\prime}(\delta_{i,j}-\epsilon)\\
+	&+  |\beta_k|^2 K^\prime(t_i - t_k+\epsilon)  K^{\prime\prime\prime}(t_i - t_k+\epsilon) 	
+\end{align}
+fejer kernel, distribution of  real alphas.
+where $ \delta_{i,j} = |t_i-t_j| $. We assumed symmetric kernel.
+\paragraph{2. $ N(t)<1 $ for $ t \in [t_{i}+\epsilon, t_{i+1}-\epsilon] $}
+
+
+\paragraph{3. For non-orthogonal samples }
+Duality question: Is solving the non-orthogonal case and assuming 
+
 \clearpage
 
 \section{Tools}
@@ -830,6 +864,7 @@ It's not clear how this can help us, since there is no natural choice of ``compa
     Then,
     \[ \max_{t \in [0, 1]} |p(t)| \leq \left(\frac{C}{m(E)}\right)^{n - 1}\max_{t \in E}|p(t)|. \]
 \end{lemma}
+
 
 \bibliographystyle{unsrt}
 \bibliography{main}

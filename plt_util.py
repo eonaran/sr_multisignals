@@ -146,7 +146,51 @@ def plot_2ndder_zoom(p, support, q, ts, hops):
     
     leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
+
+def plot_2ndder_bycomponent(p, support, ts, k):    
+    values = p(ts)
+    values_1 = p.derivative(ts)
+    values_2 = p.derivative2(ts)
+    n = values_1.shape[0]
+    k = k-1
+    plt.figure(figsize=figsize, dpi=100)
+    ax = plt.gca()
+    j = 1
     
+#     y_1 = np.real(np.matrix(values_2))[k,:] .T
+#     ax.plot(ts, y_1, c = 'C'+str(j), label = r'$q_{k,R}^{(2)}(t)$' )
+#     j = j+1
+    
+#     y_4 = np.real(np.matrix(values))[k,:].T
+#     ax.plot(ts, y_4, c = 'C'+str(j), label = r'$q_{k,R}(t)$' )
+#     j = j+1
+
+#     y_5 = np.imag(np.matrix(values))[k,:].T
+#     ax.plot(ts, y_5, c = 'C'+str(j), label = r'$q_{k,I}(t)$' )
+#     j = j+1
+
+#     y_1 = 2*np.multiply(np.real(np.matrix(values))[k,:], np.real(np.matrix(values_2))[k,:] ).T
+#     ax.plot(ts, y_1, c = 'C'+str(j), label = r'$2q_{k,R}(t)q_{k,R}^{(2)}(t)$' )
+#     j = j+1
+
+
+#     y_2 = 2*np.multiply(np.imag(np.matrix(values))[k,:], np.imag(np.matrix(values_2))[k,:] ).T
+#     ax.plot(ts, y_2, c = 'C'+str(j), label = r'$2q_{k,I}(t)q_{k,I}^{(2)}(t)$' )
+#     j = j+1
+    
+    y_3 = 2*np.multiply(np.real(values_1[k,:]), np.real(values_1[k,:])).T
+    ax.plot(ts, y_3, c = 'C'+str(j), label = r'$2(q_{k,R}^{(1)}(t))^2$' )
+    j = j+1
+    
+    # y_4 = 2*np.multiply(np.imag(values_1[k,:]), np.imag(values_1[k,:])).T
+    # ax.plot(ts, y_4, c = 'C'+str(j), label = r'$2(q_{k,I}^{(1)}(t))^2$' )
+    # j = j+1
+    
+    leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
+    leg.get_frame().set_alpha(0.5)
+    plot_support_magnitude_lines(support, start = -0.1*max(np.absolute(y_3)),  c = 'C'+str(j) )
+
+
 def plot_coeffs(coeffs, m, fc):
     n = len(coeffs)/4/m;    
     alphas_real = [coeffs[4*k*n:(4*k+1)*n] for k in range(m)]
