@@ -133,7 +133,7 @@ def jittered_supports(
     if size > 1:
         candidate_min_separation = min(
             np.min(candidate[1:] - candidate[:-1]),
-            candidate[0] - candidate[-1] + 1.0)
+            candidate[0] - candidate[-1] + 1.0) + 1e-8
     else:
         candidate_min_separation = float('inf')
 

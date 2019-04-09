@@ -280,7 +280,7 @@ def _optimize_quadratic_form(S, A, y, multiplier=1.0):
 
 def interpolate(support, sign_pattern, kernel):
     assert support.shape == sign_pattern.shape
-    assert np.all(np.absolute(np.absolute(sign_pattern) - 1.0) < 1e-10)
+    # assert np.all(np.absolute(np.absolute(sign_pattern) - 1.0) < 1e-10)
 
     n = support.shape[0]
 

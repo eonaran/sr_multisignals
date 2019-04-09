@@ -16,22 +16,22 @@ def plot_trig_poly_magnitude(p, ax=None, points=200, c='blue'):
 
     ax.plot(ts, ys, c=c)
     plt.ylabel('N(t)')
-    
-def plot_trig_poly_magnitude_der_2ndder(p, support, ax=None, points=200, c='blue'):    
+
+def plot_trig_poly_magnitude_der_2ndder(p, support, ax=None, points=200, c='blue'):
     ts = np.linspace(0.0, 1.0, points)
     values = p(ts)
     values_1 = p.derivative(ts)
     values_2 = p.derivative2(ts)
     N_1 = 2*np.real(np.diagonal(np.matrix(values_1).H.dot(values) ))
     N_2 = 2*np.real(np.diagonal(np.matrix(values_2).H.dot(values) )) + 2*(np.diagonal(np.matrix(values_1).H.dot(values_1) ))
-    
+
     plt.figure()
     ax = ax or plt.gca()
     ax.plot(ts, N_1, c=c)
     ax.plot(support, np.zeros(len(support)), 'go', ms = 5)
     plt.ylabel('N\'(t)')
     print(2*np.real(np.diagonal(np.matrix(p.derivative(support)).H.dot(p(support)) )))
-        
+
     plt.figure()
     ax = plt.gca()
     ax.plot(ts, N_2, c=c)
@@ -41,8 +41,8 @@ def plot_trig_poly_magnitude_der_2ndder(p, support, ax=None, points=200, c='blue
 
 def plot_trig_poly_each_interpolant(p, support, ax=None, points=200, c='blue'):
     ts = np.linspace(0.0, 1.0, points)
-    values = p(ts)    
-    vshape = values.shape 
+    values = p(ts)
+    vshape = values.shape
     if len(vshape) == 1:
         plt.figure(0)
         ax = ax or plt.gca()
@@ -57,28 +57,28 @@ def plot_trig_poly_each_interpolant(p, support, ax=None, points=200, c='blue'):
             plot_support_magnitude_lines(support)
             plot_magnitude_bounds()
 
-            
-            
+
+
 def plot_individual_magnitude(p, support, qs, ts, points=200, plot_Nt = True):
     values = p(ts)
-    
+
     plt.figure(figsize=figsize, dpi=100)
     ax = plt.gca()
     ys = np.linalg.norm(values, axis=0)
     if plot_Nt:
         ax.plot(ts, ys, c='C0', label = r'$N(t)$')
-        
+
     j=1
-    
+
     for k in [qss-1 for qss in qs]:
         ys = values[k,:]
         ax.plot(ts, np.absolute(ys), c = 'C'+str(j), label = r'$\Vert q_{%d}(t)\Vert $'%(k+1) )
         j  = j+1
-        
+
     plot_support_magnitude_lines(support[[qss-1 for qss in qs]], start = 0.9,  c = 'C'+str(j) )
     j = j+1
     ax.axhline(1.0, c = 'C'+str(j))
-    
+
     leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
 
@@ -95,28 +95,28 @@ def plot_individual_components(coeffs, support, kernel, kernel_1, qs, ts, hops, 
             if diff_color:
                 j = j+1
             if s == k:
-                beta_k_s = kernel_1.sum_shifts([-support[s]], [coeffs[(4*k+1)*n+s]] ) + kernel_1.sum_shifts([-support[s]], [coeffs[(4*k+3)*n + s] * 1j] )            
+                beta_k_s = kernel_1.sum_shifts([-support[s]], [coeffs[(4*k+1)*n+s]] ) + kernel_1.sum_shifts([-support[s]], [coeffs[(4*k+3)*n + s] * 1j] )
                 ax.plot(ts, np.real(beta_k_s(ts)), '--', c = 'C'+str(j), label = r'Re{$\beta_{%d} K^\prime(t-t_{%d})$}'%(k+1,k+1) )
                 if diff_color:
                     j = j+1
         if ~diff_color:
             j  = j+1
-    
+
     plot_support_magnitude_lines(support[[qss-1 for qss in qs]], start = 0.0,  c = 'C'+str(j) )
-    
+
     j = j+1
     ax.axhline(0.0, c = 'C'+str(j))
-    ax.axhline(1.0, c = 'C'+str(j))    
+    ax.axhline(1.0, c = 'C'+str(j))
 
     leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
-    
-def plot_2ndder_zoom(p, support, q, ts, hops):    
+
+def plot_2ndder_zoom(p, support, q, ts, hops):
     values = p(ts)
     values_1 = p.derivative(ts)
     values_2 = p.derivative2(ts)
     n = values_1.shape[0]
-    
+
     plt.figure(figsize=figsize, dpi=100)
     ax = plt.gca()
     j = 1
@@ -128,7 +128,7 @@ def plot_2ndder_zoom(p, support, q, ts, hops):
         if i == q:
             continue
             # j = j+1
-        else:            
+        else:
             y_2_i = 2*(np.diagonal(np.matrix(values_1[i,:]).H.dot(np.matrix(values_1[i,:]) ) ))
             ax.plot(ts, y_2_i, c = 'C'+str(j), label = r'$2\Vert q_{%d}(t)\Vert ^2$'%(i))
             N_2 = N_2 + y_2_i
@@ -136,18 +136,18 @@ def plot_2ndder_zoom(p, support, q, ts, hops):
 
     ax.plot(ts, N_2, c = 'C'+str(j), label = r'$N^{\prime\prime}(t)$')
     j = j+1
-    
-    ax.plot(support[q-1], 0, 'C'+str(j)+'o', ms = 5) 
+
+    ax.plot(support[q-1], 0, 'C'+str(j)+'o', ms = 5)
     j = j+1
-    ax.plot([support[i] for i in range(len(support)) if i!=q-1 ], np.zeros(len(support)-1), 'C'+str(j)+'o', ms = 4) 
-    
+    ax.plot([support[i] for i in range(len(support)) if i!=q-1 ], np.zeros(len(support)-1), 'C'+str(j)+'o', ms = 4)
+
     j = j+1
     ax.axhline(0.0, c = 'C'+str(j))
-    
+
     leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
 
-def plot_2ndder_bycomponent(p, support, ts, k):    
+def plot_2ndder_bycomponent(p, support, ts, k):
     values = p(ts)
     values_1 = p.derivative(ts)
     values_2 = p.derivative2(ts)
@@ -156,11 +156,11 @@ def plot_2ndder_bycomponent(p, support, ts, k):
     plt.figure(figsize=figsize, dpi=100)
     ax = plt.gca()
     j = 1
-    
+
 #     y_1 = np.real(np.matrix(values_2))[k,:] .T
 #     ax.plot(ts, y_1, c = 'C'+str(j), label = r'$q_{k,R}^{(2)}(t)$' )
 #     j = j+1
-    
+
 #     y_4 = np.real(np.matrix(values))[k,:].T
 #     ax.plot(ts, y_4, c = 'C'+str(j), label = r'$q_{k,R}(t)$' )
 #     j = j+1
@@ -177,22 +177,22 @@ def plot_2ndder_bycomponent(p, support, ts, k):
 #     y_2 = 2*np.multiply(np.imag(np.matrix(values))[k,:], np.imag(np.matrix(values_2))[k,:] ).T
 #     ax.plot(ts, y_2, c = 'C'+str(j), label = r'$2q_{k,I}(t)q_{k,I}^{(2)}(t)$' )
 #     j = j+1
-    
+
     y_3 = 2*np.multiply(np.real(values_1[k,:]), np.real(values_1[k,:])).T
     ax.plot(ts, y_3, c = 'C'+str(j), label = r'$2(q_{k,R}^{(1)}(t))^2$' )
     j = j+1
-    
+
     # y_4 = 2*np.multiply(np.imag(values_1[k,:]), np.imag(values_1[k,:])).T
     # ax.plot(ts, y_4, c = 'C'+str(j), label = r'$2(q_{k,I}^{(1)}(t))^2$' )
     # j = j+1
-    
+
     leg = plt.legend(loc=2, ncol=1, fancybox=True, bbox_to_anchor=(1.03, 1))
     leg.get_frame().set_alpha(0.5)
     plot_support_magnitude_lines(support, start = -0.1*max(np.absolute(y_3)),  c = 'C'+str(j) )
 
 
 def plot_coeffs(coeffs, m, fc):
-    n = len(coeffs)/4/m;    
+    n = len(coeffs)/4/m;
     alphas_real = [coeffs[4*k*n:(4*k+1)*n] for k in range(m)]
     betas_real = [fc*coeffs[(4*k+1)*n:(4*k+2)*n] for k in range(m)]
     alphas_real = np.reshape(alphas_real, (n,m)).T
@@ -201,7 +201,7 @@ def plot_coeffs(coeffs, m, fc):
     betas_imag = [coeffs[(4*k+3)*n:(4*k+4)*n] for k in range(m)]
     alphas_imag = np.reshape(alphas_imag, (n,m)).T
     betas_imag = np.reshape(betas_imag, (n,m)).T
-    
+
     plt.figure(figsize=[2.5*f for f in figsize], dpi=100)
     plt.subplot(221)
     plt.imshow(np.absolute(alphas_real))
@@ -213,7 +213,7 @@ def plot_coeffs(coeffs, m, fc):
     plt.colorbar()
     plt.gca().set_xticklabels([int(i+1) for i in plt.gca().get_xticks()])
     plt.gca().set_yticklabels([int(i+1) for i in plt.gca().get_yticks()])
-    
+
     plt.subplot(222)
     plt.imshow(np.absolute(betas_real))
     for (j,i),label in np.ndenumerate(np.around(np.absolute(betas_real),3)):
@@ -231,7 +231,7 @@ def plot_support_magnitude_lines(support, start= 0.0, height=1.0, ax=None, c='gr
     ax.vlines(support, start, height, color=c)
 
 
-def plot_magnitude_bounds(xmin=0.0, xmax=1.0, c='red'):
-    ax = plt.gca()
+def plot_magnitude_bounds(xmin=0.0, xmax=1.0, c='red', ax=None):
+    ax = ax or plt.gca()
 
     ax.hlines([1.0], xmin, xmax, color=c)
