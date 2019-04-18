@@ -1,0 +1,416 @@
+\documentclass[11pt]{article}
+
+% Packages
+\usepackage{enumitem}
+\usepackage{amscd}
+\usepackage{amsmath}
+\usepackage{amstext}
+\usepackage{bbold}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{color}
+\usepackage{colonequals}
+\usepackage{easybmat}
+\usepackage{etex}
+\usepackage{framed}
+\usepackage[dvips,letterpaper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage[noabbrev,capitalize]{cleveref}
+\usepackage{mathtools}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{verbatim}
+\usepackage[capitalize]{cleveref}
+
+%
+% Commands
+%
+
+% Figures
+\newcommand{\fig}[1]{(figure \ref{#1})}
+\newcommand{\FIG}[1]{figure \ref{#1}}
+
+\DeclareSymbolFont{bbold}{U}{bbold}{m}{n}
+\DeclareSymbolFontAlphabet{\mathbbold}{bbold}
+
+% Names
+\newcommand{\Mobius}{M\"{o}bius}
+\newcommand{\Holder}{H\"{o}lder}
+\newcommand{\Rouche}{Rouch\'{e}}
+\newcommand{\Ito}{It\={o}}
+\newcommand{\Kondo}{Kond\^{o}}
+\newcommand{\Levy}{L\'{e}vy}
+\newcommand{\Cramer}{Cram\'{e}r}
+\newcommand{\Godel}{G\"{o}del}
+\newcommand{\Carath}{Carath\'{e}odory}
+\newcommand{\Caratheodory}{Carath\'{e}odory}
+\newcommand{\Hopital}{H\^{o}pital}
+
+% Random
+\renewcommand{\bar}{\overline}
+\newcommand{\lvec}{\overrightarrow}
+\newcommand{\ra}{\rangle}
+\newcommand{\la}{\langle}
+
+% Disjoint union
+\makeatletter
+\def\moverlay{\mathpalette\mov@rlay}
+\def\mov@rlay#1#2{\leavevmode\vtop{%
+   \baselineskip\z@skip \lineskiplimit-\maxdimen
+   \ialign{\hfil$\m@th#1##$\hfil\cr#2\crcr}}}
+\newcommand{\charfusion}[3][\mathord]{
+    #1{\ifx#1\mathop\vphantom{#2}\fi
+        \mathpalette\mov@rlay{#2\cr#3}
+      }
+    \ifx#1\mathop\expandafter\displaylimits\fi}
+\makeatother
+
+\newcommand{\cupdot}{\charfusion[\mathbin]{\cup}{\cdot}}
+\newcommand{\bigcupdot}{\charfusion[\mathop]{\bigcup}{\cdot}}
+
+% Blackboard bold
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\TT}{\mathbb{T}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\DD}{\mathbb{D}}
+\newcommand{\HH}{\mathbb{H}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\EE}{\mathbb{E}}
+\renewcommand{\AA}{\mathbb{A}}
+\newcommand{\FF}{\mathbb{F}}
+\renewcommand{\SS}{\mathbb{S}}
+\newcommand{\Fp}{\FF_p}
+\newcommand{\TrivGp}{\mathbbold{1}}
+\newcommand{\One}{\mathbbold{1}}
+
+\newcommand{\RP}{\RR\mathrm{P}}
+\newcommand{\CP}{\CC\mathrm{P}}
+
+% Vector bold
+\newcommand{\nn}{\bm{n}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\ww}{\bm{w}}
+\newcommand{\xx}{\bm{x}}
+\newcommand{\yy}{\bm{y}}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\one}{\bm{1}}
+
+% Other fonts
+\newcommand{\fp}{\mathfrak{p}}
+\newcommand{\fq}{\mathfrak{q}}
+\newcommand{\fg}{\mathfrak{g}}
+\newcommand{\fh}{\mathfrak{h}}
+\newcommand{\fa}{\mathfrak{a}}
+\newcommand{\fb}{\mathfrak{b}}
+\newcommand{\fc}{\mathfrak{c}}
+\newcommand{\fm}{\mathfrak{m}}
+\renewcommand{\sl}{\mathfrak{sl}}
+\newcommand{\so}{\mathfrak{so}}
+\newcommand{\gl}{\mathfrak{gl}}
+\renewcommand{\sp}{\mathfrak{sp}}
+\newcommand{\sA}{\mathcal{A}}
+\newcommand{\sB}{\mathcal{B}}
+\newcommand{\sC}{\mathcal{C}}
+\newcommand{\sD}{\mathcal{D}}
+\newcommand{\sE}{\mathcal{E}}
+\newcommand{\sF}{\mathcal{F}}
+\newcommand{\sG}{\mathcal{G}}
+\newcommand{\sH}{\mathcal{H}}
+\newcommand{\sI}{\mathcal{I}}
+\newcommand{\sL}{\mathcal{L}}
+\newcommand{\sM}{\mathcal{M}}
+\newcommand{\sN}{\mathcal{N}}
+\newcommand{\sO}{\mathcal{O}}
+\newcommand{\sP}{\mathcal{P}}
+\newcommand{\sR}{\mathcal{R}}
+\newcommand{\sS}{\mathcal{S}}
+\newcommand{\sT}{\mathcal{T}}
+\newcommand{\sU}{\mathcal{U}}
+\newcommand{\sV}{\mathcal{V}}
+\newcommand{\sX}{\mathcal{X}}
+\newcommand{\sY}{\mathcal{Y}}
+
+% Spacing
+\newcommand\ThmBr{%
+    \@ifstar{\item[\vbox{\null}]}{%
+      \begingroup % keep changes local
+      \setlength\itemsep{0pt}%
+      \setlength\parsep{0pt}%
+       \item[\vbox{\null}]%
+      \endgroup%
+     }}
+\newcommand{\br}{\vspace{1pc}}
+\newcommand{\BR}{\vspace{2pc}}
+\newcommand{\picspace}{\vspace{13pc}}
+\newcommand{\hs}{\hspace{1mm}}
+\newcommand{\HS}{\hspace{3.5mm}}
+\newcommand{\hr}{
+  \begin{center}
+    \line(1,0){250}
+  \end{center}
+}
+\newcommand{\hrs}{
+  \begin{center}
+    \line(1,0){150}
+  \end{center}
+}
+
+% Plain text
+\renewcommand{\Re}{\mathrm{Re}}
+\renewcommand{\Im}{\mathrm{Im}}
+
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+
+\newcommand{\disc}{\mathrm{disc}}
+\newcommand{\Ann}{\mathrm{Ann}}
+\newcommand{\Ass}{\mathrm{Ass}}
+\newcommand{\Soc}{\mathrm{Soc}}
+\newcommand{\Supp}{\mathrm{Supp}}
+\newcommand{\Spec}{\mathrm{Spec}}
+\newcommand{\maxSpec}{\mathrm{maxSpec}}
+
+\newcommand{\N}{\mathrm{N}}
+\newcommand{\Tr}{\mathrm{Tr}}
+
+% Functors
+\newcommand{\Hom}{\mathrm{Hom}}
+\newcommand{\Der}{\mathrm{Der}}
+\newcommand{\End}{\mathrm{End}}
+\newcommand{\Ind}{\mathrm{Ind}}
+\newcommand{\Aut}{\mathrm{Aut}}
+\newcommand{\Gal}{\mathrm{Gal}}
+\newcommand{\Sym}{\mathrm{Sym}}
+\newcommand{\Rad}{\mathrm{Rad}}
+\newcommand{\Id}{\mathrm{Id}}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\Pow}{\mathrm{Pow}}
+\newcommand{\diam}{\mathrm{diam}}
+
+\newcommand{\img}{\mathrm{img}}
+\newcommand{\sgn}{\mathrm{sgn}}
+
+\newcommand{\ch}{\mathrm{char}}
+\newcommand{\Res}{\mathrm{Res}}
+\newcommand{\ord}{\mathrm{ord}}
+\newcommand{\cont}{\mathrm{cont}}
+\newcommand{\ab}{\mathrm{ab}}
+\newcommand{\Orb}{\mathrm{Orb}}
+\newcommand{\Syl}{\mathrm{Syl}}
+\newcommand{\Irr}{\mathrm{Irr}}
+\newcommand{\Frac}{\mathrm{Frac}}
+\newcommand{\sep}{\mathrm{sep}}
+\newcommand{\per}{\mathrm{per}}
+
+% Groups
+\newcommand{\GL}{\mathrm{GL}}
+\newcommand{\PGL}{\mathrm{PGL}}
+\newcommand{\PSL}{\mathrm{PSL}}
+\newcommand{\SL}{\mathrm{SL}}
+\newcommand{\oO}{\mathrm{O}}
+\newcommand{\SO}{\mathrm{SO}}
+\newcommand{\PSO}{\mathrm{PSO}}
+\newcommand{\Sp}{\mathrm{Sp}}
+\newcommand{\PSp}{\mathrm{PSp}}
+\newcommand{\U}{\mathrm{U}}
+\newcommand{\SU}{\mathrm{SU}}
+\newcommand{\PSU}{\mathrm{PSU}}
+
+% Parentheses
+\newcommand{\lgndr}[2]{\ensuremath{\left(\frac{#1}{#2}\right)}}
+
+% Mappings
+\newcommand{\iso}{\cong}
+\newcommand{\eqdf}{\stackrel{\mathrm{df}}{=}}
+\newcommand{\eqd}{\stackrel{\mathrm{d}}{=}}
+\newcommand{\eqqu}{\stackrel{\mathrm{?}}{=}}
+\newcommand{\xto}{\xrightarrow}
+\newcommand{\dto}{\Rightarrow}
+\newcommand{\into}{\hookrightarrow}
+\newcommand{\xinto}{\xhookrightarrow}
+\newcommand{\onto}{\twoheadrightarrow}
+\newcommand{\xonto}{xtwoheadrightarrow}
+\newcommand{\isoto}{\xto{\sim}}
+\newcommand{\upto}{\nearrow}
+\newcommand{\downto}{\searrow}
+
+% Convenience
+\newcommand{\Implies}{\ensuremath{\Rightarrow}}
+\newcommand{\ImpliedBy}{\ensuremath{\Leftarrow}}
+\newcommand{\Iff}{\ensuremath{\Leftrightarrow}}
+
+\newcommand{\Pfright}{\ensuremath{(\Rightarrow):\hs}}
+\newcommand{\Pfleft}{\ensuremath{(\Leftarrow):\hs}}
+
+\newcommand{\sm}{\ensuremath{\setminus}}
+
+\newcommand{\tab}[1]{(table \ref{#1})}
+\newcommand{\TAB}[1]{table \ref{#1}}
+
+\newcommand{\precode}[1]{\textbf{\footnotesize #1}}
+\newcommand{\code}[1]{\texttt{\footnotesize #1}}
+
+\newcommand{\sectionline}{
+  \nointerlineskip \vspace{\baselineskip}
+  \hspace{\fill}\rule{0.35\linewidth}{.7pt}\hspace{\fill}
+  \par\nointerlineskip \vspace{\baselineskip}
+}
+
+
+%
+% Misc
+%
+
+\parskip0em
+\linespread{1.05}
+\widowpenalty10000
+\clubpenalty10000
+
+
+\newcommand{\HC}{\mathsf{HC}}
+\newcommand{\CHC}{\mathsf{CHC}}
+\newcommand{\SK}{\mathsf{SK}}
+\newcommand{\SDP}{\mathsf{SDP}}
+\newcommand{\SOS}{\mathsf{SOS}}
+\newcommand{\PE}{\mathsf{PE}}
+\newcommand{\PS}{\mathsf{PS}}
+\newcommand{\tEE}{\tilde{\mathbb{E}}}
+\newcommand{\tCov}{\widetilde{\mathrm{Cov}}}
+\newcommand{\sfP}{\mathsf{P}}
+\newcommand{\argmin}{\mathrm{argmin}}
+\newcommand{\argmax}{\mathrm{argmax}}
+\newcommand{\diag}{\mathsf{diag}}
+\newcommand{\eq}{\mathsf{eq}}
+\newcommand{\der}{\mathsf{der}}
+\newcommand{\vrad}{\mathrm{vrad}}
+\newcommand{\rk}{\mathrm{rk}}
+\newcommand{\rkeff}{\mathrm{rk}_{\mathrm{eff}}}
+\newcommand{\GOE}{\mathsf{GOE}}
+\newcommand{\ssG}{\mathsf{G}}
+\newcommand{\balpha}{\bm \alpha}
+\newcommand{\blambda}{\bm \lambda}
+\newcommand{\bbeta}{\bm \beta}
+\newcommand{\bA}{\bm A}
+\newcommand{\bB}{\bm B}
+\newcommand{\bC}{\bm C}
+\newcommand{\bD}{\bm D}
+\newcommand{\bF}{\bm F}
+\newcommand{\bG}{\bm G}
+\newcommand{\bH}{\bm H}
+\newcommand{\bK}{\bm K}
+\newcommand{\bk}{\bm k}
+\newcommand{\bM}{\bm M}
+\newcommand{\bP}{\bm P}
+\newcommand{\bQ}{\bm Q}
+\newcommand{\bR}{\bm R}
+\newcommand{\bS}{\bm S}
+\newcommand{\bV}{\bm V}
+\newcommand{\bW}{\bm W}
+\newcommand{\bX}{\bm X}
+\newcommand{\bY}{\bm Y}
+\newcommand{\ba}{\bm a}
+\newcommand{\bb}{\bm b}
+\newcommand{\bc}{\bm c}
+\newcommand{\be}{\bm e}
+\newcommand{\bg}{\bm g}
+\newcommand{\bv}{\bm v}
+\newcommand{\bw}{\bm w}
+\newcommand{\bx}{\bm x}
+\newcommand{\bq}{\bm q}
+\newcommand{\bkappa}{\bm \kappa}
+\newcommand{\tp}{\mathsf{3pt}}
+\newcommand{\od}{\mathsf{1D}}
+
+\newcommand{\bmat}[2]{
+	\begin{bmatrix*}[#1]
+		#2
+	\end{bmatrix*}
+}
+
+\DeclareRobustCommand{\bmrob}[1]{\bm{#1}}
+\pdfstringdefDisableCommands{%
+  \renewcommand{\bmrob}[1]{#1}%
+}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{question}{Question}
+\newtheorem{task}{Task}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
+
+\newcounter{para}
+\newcommand\mypara[1]{\paragraph{\refstepcounter{para}#1}}
+
+\title{Large Minimum Separation}
+\author{}
+
+\begin{document}
+
+\maketitle
+
+\noindent
+
+\section{Assumptions}
+
+\begin{enumerate}
+\item Orthogonal signs, equal to standard basis vectors $(\bV = \bm I)$
+\item $m = s$
+\item $\Delta \approx (1 + C)\lambda_c$.
+\end{enumerate}
+
+\section{Setup}
+
+\noindent
+The solution is:
+\begin{align}
+  (\bK_r)_{ij} &= K^{(r)}(t_i - t_j) \\
+  (\bk_r(t))_i &= K^{(r)}(t - t_i) \\
+  \bbeta &= \frac{\diag(\bK_0^{-1}\bK_1)}{\diag(\bK_2) - \diag(\bK_1\bK_0^{-1}\bK_1)}, \\
+  \bq(t) &= \bK_0^{-1}\bk_0(t) + \bD_{\bbeta}\bigg[\bk_1(t) - \bK_1\bK_0^{-1}\bk_0(t)\bigg]
+\end{align}
+The norm is described by:
+\begin{align}
+  N(t) &= \|\bq(t)\|_2^2, \\
+  N^\prime(t) &= 2\Re(\la \bq(t), \bq^\prime(t) \ra), \\
+  N^{\prime\prime}(t) &= 2\left(\Re(\la \bq(t), \bq^{\prime\prime}(t) \ra) + \|\bq^\prime(t)\|_2^2\right).
+\end{align}
+
+\section{$t$ Near $t_i$, Derivative Term}
+
+\begin{align*}
+  \|\bq^\prime(t)\|_2^2
+  &= \left\|\bK_0^{-1}\bk_1(t) + \bD_{\bbeta}\bigg[\bk_2(t) - \bK_1\bK_0^{-1}\bk_1(t)\bigg]\right\|_2^2 \\
+  &\leq \bigg(\|\bK_0^{-1}\|\cdot \|\bk_1(t)\|_2 + \|\bD_{\bbeta}\|\cdot \|\bk_2(t)\|_2 + \|\bD_{\bbeta}\|\cdot \|\bK_1\| \cdot \|\bK_0^{-1}\| \cdot \|\bk_1(t)\|_2\bigg)^2
+\end{align*}
+(Writing $\|\bX\|$ for operator norm.)
+Will control operator norms by:
+\begin{align*}
+  \|\bD_{\bbeta}\| &= \max_{i \in [s]} |\beta_i| \\
+  \|\bX\| &\leq \|\bX\|_{\infty} = \max_{i \in [s]} \sum_{j = 1}^s |X_{ij}|
+\end{align*}
+
+\section{$t$ Away from Support}
+
+\begin{align*}
+  \|\bq(t)\|_2^2
+  &= \left\|\bK_0^{-1}\bk_0(t) + \bD_{\bbeta}\bigg[\bk_1(t) - \bK_1\bK_0^{-1}\bk_0(t)\bigg]\right\|_2^2 \\
+  &\leq \bigg(\|\bK_0^{-1}\|\cdot \|\bk_0(t)\|_2 + \|\bD_{\bbeta}\|\cdot \|\bk_1(t)\|_2 + \|\bD_{\bbeta}\|\cdot \|\bK_1\| \cdot \|\bK_0^{-1}\| \cdot \|\bk_0(t)\|_2\bigg)^2
+\end{align*}
+
+\bibliographystyle{unsrt}
+\bibliography{main}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
