@@ -107,7 +107,7 @@ class CircleInterval(object):
 
 
 def lrange(r1, inc, r2):
-    n = ((r2-r1)+2*np.spacing(r2-r1))//inc
+    n = int(((r2-r1)+2*np.spacing(r2-r1))/inc)
     return np.linspace(r1, r1 + inc*n, n+1)
 
 
