@@ -1,6 +1,7 @@
 import operator
 import numbers
 import numpy as np
+from functools import reduce
 
 
 class TrigPoly(object):
